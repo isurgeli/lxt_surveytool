@@ -1,0 +1,1 @@
+xcopy /S /Y lxt_surveytool H:\Learn_Test\wordpress\wp-content\plugins\lxt_surveytool
