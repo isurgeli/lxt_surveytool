@@ -88,7 +88,7 @@ class lxt_surveytool_Admin {
 		 */
 		//add_action( '@TODO', array( $this, 'action_method_name' ) );
 		//add_filter( '@TODO', array( $this, 'filter_method_name' ) );
-
+		//add_filter('get_sample_permalink_html', array( $this, 'hide_survey_permalinks' ) );
 	}
 
 	/**
@@ -243,8 +243,11 @@ class lxt_surveytool_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function filter_method_name() {
-		// @TODO: Define your filter hook callback here
+	public function hide_survey_permalinks() {
+		global $post;
+		if($post->post_type == $this->plugin_slug )
+            $out = '';//preg_replace('~<div id="edit-slug-box".*</div>~Ui', '', $link);
+        return $out;
 	}
 
 }

@@ -86,5 +86,5 @@ if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 
 	require_once( plugin_dir_path( __FILE__ ) . 'admin/class-lxt_surveytool-admin.php' );
 	add_action( 'plugins_loaded', array( 'lxt_surveytool_Admin', 'get_instance' ) );
-
 }
+

@@ -1,1 +1,5 @@
 /* This stylesheet is used to style the public-facing components of the plugin. */
+input.lxt_field.must {
+	border-style:solid;
+	border-color:#ff0000;
+

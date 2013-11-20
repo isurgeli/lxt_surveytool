@@ -78,9 +78,11 @@ class lxt_surveytool {
 		/* Define custom functionality.
 		 * Refer To http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters
 		 */
-		//add_action( '@TODO', array( $this, 'action_method_name' ) );
-		//add_filter( '@TODO', array( $this, 'filter_method_name' ) );
-
+		add_action( 'init', array( $this, 'add_plugin_posttype' ) );
+		add_action( 'init', array( $this, 'add_plugin_shortcode' ) );
+		add_action( 'the_posts', array( $this, 'has_plugin_shortcode') );
+		add_action( 'wp_ajax_nopriv_lxt_surveytool_savesurvey', array( 'lxt_surveytool', 'ajax_save_survey') );
+		add_action( 'wp_ajax_lxt_surveytool_savesurvey', array( 'lxt_surveytool', 'ajax_save_survey') );
 	}
 
 	/**
@@ -270,7 +272,8 @@ class lxt_surveytool {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );
+		//wp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );
+		//wp_enqueue_style( 'jquery ui', 'http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css', array(), '1.10.3' );
 	}
 
 	/**
@@ -279,7 +282,8 @@ class lxt_surveytool {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), self::VERSION );
+		//wp_enqueue_script( $this->plugin_slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), self::VERSION );
+		//wp_enqueue_script( 'jquery ui', 'http://code.jquery.com/ui/1.10.3/jquery-ui.js', array( 'jquery' ), '1.10.3' );
 	}
 
 	/**
@@ -291,8 +295,128 @@ class lxt_surveytool {
 	 *
 	 * @since    1.0.0
 	 */
-	public function action_method_name() {
-		// @TODO: Define your action hook callback here
+	public function add_plugin_posttype() {
+		$survey_args = array(
+			'public' => true,
+			'query_var' => $this->plugin_slug,
+			'show_in_nav_menus' => false,
+			'rewrite' => array(
+				'slug' => $this->plugin_slug,
+				'with_front' => false),
+	        'supports' => array(
+		        'title',
+			    'editor'
+			),
+			'labels' => array(
+				'name' => __('Surveys', $this->plugin_slug),
+		        'singular_name' => __('Survey', $this->plugin_slug),
+				'add_new' => __('Add New Survey', $this->plugin_slug),
+				'add_new_item' => __('Add New Survey', $this->plugin_slug),
+				'edit_item' => __('Edit Survey', $this->plugin_slug),
+				'new_item' => __('New Survey', $this->plugin_slug),
+				'view_item' => __('View Survey', $this->plugin_slug),
+				'search_items' => __('Search Surveys', $this->plugin_slug),
+				'not_found' => __('No Surveys Found', $this->plugin_slug),
+				'not_found_in_trash' => __('No Surveys Found In Trash', $this->plugin_slug)
+			)
+		);
+ 
+		register_post_type( $this->plugin_slug, $survey_args );
+	}
+
+	public function ajax_save_survey() {
+		echo "I'm here";
+		die();
+	}
+
+	public function add_plugin_shortcode() {
+		add_shortcode( 'lxt_dosurvey', array('lxt_surveytool', 'lxt_dosurvey_shortcode') );
+		add_shortcode( 'lxt_survey_ques', array('lxt_surveytool', 'lxt_survey_ques_shortcode') );
+	}
+
+	public function lxt_survey_ques_shortcode($attr) {
+		if (!$attr || !($key = $attr['key'])) return '';
+		$title = $attr['title'];
+		if (!($type = $attr['type'])) $type="text";
+		if (($type == 'radio' || $type == 'checkbox') && !($answerstr = $attr['answer'])) return __('No option answer.');
+
+		$output = '<p>'.$title.'</p>';
+		if ($type != 'radio' && $type != 'checkbox') {
+			$output .= '<p><input class="lxt_surveytool_field" type="'.$type.'" name="'.$key.'"></p>';
+		}else{
+			$answers = explode(";", $answerstr);
+			$output .= '<p>';
+			foreach ($answers as $answer){
+				$output .= '<input class="lxt_surveytool_field" type="'.$type.'" name="'.$key.'" value="'.$answer.'">'.$answer.'<br/>';
+			}
+			$output .= '</p>';
+		}
+
+		return $output;
+	}
+
+	public function title_filter($where, &$wp_query)
+    {
+		global $wpdb;
+        if ( $search_term = $wp_query->get( 'search_prod_title' ) ) {
+			$where .= ' AND ' . $wpdb->posts . '.post_title LIKE \'%' . esc_sql( like_escape( $search_term ) ) . '%\'';
+        }
+        return $where;
+    }
+
+	public function lxt_dosurvey_shortcode($attr) {
+		if (!$attr || !($title = $attr['title'])) return '';
+		$args = array(
+			'post_type' => lxt_surveytool::get_instance()->plugin_slug,
+			'orderby' => 'title',
+			'post_status' => 'publish',
+			'order' => 'ASC',
+			'posts_per_page' => -1,
+			'search_prod_title' => $title
+		);
+		add_filter( 'posts_where', array('lxt_surveytool', 'title_filter'), 10, 2 );
+		$loop = new WP_Query($args);
+		remove_filter( 'posts_where', 'title_filter', 10, 2 );
+
+		if ( $loop->have_posts() ) {
+			$loop->the_post();
+			$ajaxurl = admin_url().'admin-ajax.php';
+			$output = '<div ajaxurl="'.$ajaxurl.'" class="lxt_survey_dialog" id="lxt_survey_dialog'.get_the_ID().'" title="'.get_the_title('', '', false).'">';
+			$output .= do_shortcode(get_the_content());
+			$output .= '</div>';
+			$output .= '<a href="#" class="lxt_survey_dialog_opener" dialog="lxt_survey_dialog'.get_the_ID().'">'.get_the_title('', '', false).'</a>';
+		}
+		else {
+			$output = '';
+		}
+ 
+		return $output;
+	}
+
+	function has_plugin_shortcode($posts) {
+		if ( empty($posts) )
+			return $posts;
+
+		$found = false;
+
+		foreach ($posts as $post) {
+			if ( stripos($post->post_content, '[lxt_dosurvey') ) {
+				$found = true;
+				break;
+			}
+		}
+
+		if ($found){
+			wp_enqueue_style( 'jquery ui', 'http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css', array(), '1.10.3' );
+			wp_enqueue_script( 'jquery ui', 'http://code.jquery.com/ui/1.10.3/jquery-ui.js', array( 'jquery' ), '1.10.3' );
+			wp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );
+			wp_enqueue_script( $this->plugin_slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), self::VERSION );	
+			wp_localize_script( $this->plugin_slug . '-plugin-script', 'lxt_surveytool_L10n', array(
+				'submit' => __( 'Submit', $this->plugin_slug ),
+		        'cancel' => __( 'Cancel', $this->plugin_slug ),
+			));
+		}
+		return $posts;
 	}
 
 	/**
