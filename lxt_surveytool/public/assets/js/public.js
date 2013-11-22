@@ -28,9 +28,9 @@
 								ret[$(this).attr('name')] = $(this).val();
 						});
 
-						ret.action = 'lxt_surveytool_savesurvey';
+						var ajaxObj = {action : 'lxt_surveytool_savesurvey', result : JSON.stringify(ret)};
 						
-						jQuery.post(ajaxurl, ret, function( resp ) {
+						jQuery.post(ajaxurl+'?XDEBUG_SESSION_START=1', ajaxObj, function( resp ) {
 							alert(resp);
 						});
 

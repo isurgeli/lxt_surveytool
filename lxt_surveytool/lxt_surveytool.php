@@ -5,11 +5,11 @@
  * A foundation off of which to build well-documented WordPress plugins that
  * also follow WordPress Coding Standards and PHP best practices.
  *
- * @package   Plugin_Name
- * @author    Your Name <email@example.com>
+ * @package   Just another survey tool
+ * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
- * @link      http://example.com
- * @copyright 2013 Your Name or Company Name
+ * @link      http://isurge.wordpress.com
+ * @copyright 2013 Li xintao
  *
  * @wordpress-plugin
  * Plugin Name:       Just another survey tool
@@ -22,7 +22,6 @@
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path:       /languages
- * GitHub Plugin URI: https://github.com/<owner>/<repo>
  */
 
 // If this file is called directly, abort.
@@ -34,32 +33,15 @@ if ( ! defined( 'WPINC' ) ) {
  * Public-Facing Functionality
  *----------------------------------------------------------------------------*/
 
-/*
- * @TODO:
- *
- * - replace `class-plugin-name.php` with the name of the plugin's class file
- *
- */
 require_once( plugin_dir_path( __FILE__ ) . 'public/class-lxt_surveytool.php' );
 
 /*
  * Register hooks that are fired when the plugin is activated or deactivated.
  * When the plugin is deleted, the uninstall.php file is loaded.
- *
- * @TODO:
- *
- * - replace Plugin_Name with the name of the class defined in
- *   `class-plugin-name.php`
  */
 register_activation_hook( __FILE__, array( 'lxt_surveytool', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'lxt_surveytool', 'deactivate' ) );
 
-/*
- * @TODO:
- *
- * - replace Plugin_Name with the name of the class defined in
- *   `class-plugin-name.php`
- */
 add_action( 'plugins_loaded', array( 'lxt_surveytool', 'get_instance' ) );
 
 /*----------------------------------------------------------------------------*
@@ -67,12 +49,6 @@ add_action( 'plugins_loaded', array( 'lxt_surveytool', 'get_instance' ) );
  *----------------------------------------------------------------------------*/
 
 /*
- * @TODO:
- *
- * - replace `class-plugin-admin.php` with the name of the plugin's admin file
- * - replace Plugin_Name_Admin with the name of the class defined in
- *   `class-plugin-name-admin.php`
- *
  * If you want to include Ajax within the dashboard, change the following
  * conditional to:
  *
