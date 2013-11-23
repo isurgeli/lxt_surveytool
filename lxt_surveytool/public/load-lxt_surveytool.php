@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   Just another survey tool
+ * @package   lxt_surveytool
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com

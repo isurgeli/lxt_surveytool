@@ -1,7 +1,7 @@
-=== @TODO: Plugin Name ===
-Contributors: (this should be a list of wordpress.org userids)
-Donate link: http://example.com/
-Tags: comments, spam
+===Just another survey tool===
+Contributors: isurge
+Donate link: http://isurge.wordpress.com
+Tags: survey
 Requires at least: 3.5.1
 Tested up to: 3.6
 Stable tag: 1.0.0

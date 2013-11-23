@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   Just another survey tool
+ * @package   lxt_surveytool
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -31,15 +31,17 @@ class lxt_surveytool {
 		// Activate plugin when new blog is added
 		add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );
 
-		require_once( plugin_dir_path( __FILE__ ) . 'ajax-lxt_surveytool.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'load-lxt_surveytool.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'post-lxt_surveytool.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-lxt_surveytool.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'ajax-'.$this->plugin_slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'load-'.$this->plugin_slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'post-'.$this->plugin_slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-'.$this->plugin_slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'wgsv-'.$this->plugin_slug.'.php' );
 
 		new lxt_surveytool_ajax($this->plugin_slug, self::VERSION);
 		new lxt_surveytool_load($this->plugin_slug, self::VERSION);
 		new lxt_surveytool_post($this->plugin_slug, self::VERSION);
 		new lxt_surveytool_shortcode($this->plugin_slug, self::VERSION);
+		lxt_surveytool_wgsv::init();
 	}
 
 	public function get_plugin_slug() {
@@ -154,12 +156,12 @@ class lxt_surveytool {
 	private static function single_activate() {
 		// @TODO: Define activation functionality here
 		If ( version_compare( get_bloginfo( 'version' ), '3.7', '<' ) ) {
-			deactivate_plugins( 'lxt_surveytool' ); // Deactivate our plugin
+			deactivate_plugins( $this->plugin_slug ); // Deactivate our plugin
 		}
 
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . "lxt_surveytool_surveys";
+		$table_name = $wpdb->prefix . $this->plugin_slug . '_surveys';
       
 		$sql = "CREATE TABLE $table_name (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -193,3 +195,4 @@ class lxt_surveytool {
 
 	}
 }
+

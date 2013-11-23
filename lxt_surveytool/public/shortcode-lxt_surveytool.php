@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   Just another survey tool
+ * @package   lxt_surveytool
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -39,12 +39,12 @@ class lxt_surveytool_shortcode {
 
 		$output = '<p>'.$title.'</p>';
 		if ($type != 'radio' && $type != 'checkbox') {
-			$output .= '<p><input class="lxt_surveytool_field" type="'.$type.'" name="'.$key.'"></p>';
+			$output .= '<p><input class="'.$this->plugin_slug.'_field" type="'.$type.'" name="'.$key.'"></p>';
 		}else{
 			$answers = explode(";", $answerstr);
 			$output .= '<p>';
 			foreach ($answers as $answer){
-				$output .= '<input class="lxt_surveytool_field" ';
+				$output .= '<input class="'.$this->plugin_slug.'_field" ';
 				if ($answers[0] == $answer && $type == 'radio')
 					$output .= 'checked ';
 			   	$output .= 'type="'.$type.'" name="'.$key.'" value="'.$answer.'">'.$answer.'<br/>';
@@ -57,6 +57,11 @@ class lxt_surveytool_shortcode {
 
 	public function lxt_dosurvey_shortcode($attr) {
 		if (!$attr || !($title = $attr['title'])) return '';
+
+		return $this->getSurveyOutput( $title, 'shortcode' );
+	}
+
+	public function getSurveyOutput( $title, $context ) {
 		$args = array(
 			'post_type' => $this->plugin_slug,
 			'orderby' => 'title',
@@ -72,11 +77,27 @@ class lxt_surveytool_shortcode {
 
 		if ( $loop->have_posts() ) {
 			$loop->the_post();
+			if (!($lxt_st_width = get_post_meta( get_the_ID(), '_lxt_st_width', true )))
+				$lxt_st_width = 300;
+			if (!($lxt_st_height = get_post_meta( get_the_ID(), '_lxt_st_height', true )))
+				$lxt_st_height = 350;
+			if (!($lxt_st_visibility = get_post_meta( get_the_ID(), '_lxt_st_visibility', true )))
+				$lxt_st_visibility = __('All', $this->plugin_slug);
+
+			if ( !is_user_logged_in() && $lxt_st_visibility != __('All', $this->plugin_slug))
+				return '';
+
+			$nonce = wp_create_nonce($context);
+
 			$ajaxurl = admin_url().'admin-ajax.php';
-			$output = '<div ajaxurl="'.$ajaxurl.'" class="lxt_survey_dialog" id="lxt_survey_dialog'.get_the_ID().'" title="'.get_the_title('', '', false).'">';
-			$output .= do_shortcode(get_the_content());
+			$output = '<div w="'.$lxt_st_width.'" h="'.$lxt_st_height.'" ajaxurl="'.$ajaxurl.'" class="lxt_survey_dialog" id="lxt_survey_dialog'.$nonce.'" title="'.get_the_title('', '', false).'">';
+			$output .= do_shortcode( get_the_content() );
+			if ( !is_user_logged_in() ) {
+				$output .= '<p>'.__('Email').'</p>';
+				$output .= '<p><input class="'.$this->plugin_slug.'_field" type="email" name="the_email"></p>';
+			}
 			$output .= '</div>';
-			$output .= '<a href="#" class="lxt_survey_dialog_opener" dialog="lxt_survey_dialog'.get_the_ID().'">'.get_the_title('', '', false).'</a>';
+			$output .= '<a href="#" class="lxt_survey_dialog_opener" dialog="lxt_survey_dialog'.$nonce.'">'.get_the_title('', '', false).'</a>';
 		}
 		else {
 			$output = '';

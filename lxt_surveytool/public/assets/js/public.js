@@ -9,8 +9,8 @@
 				ajaxurl = $(this).attr('ajaxurl');
 			$(this).dialog({
 				autoOpen: false,
-				height: 300,
-				width: 350,
+				height: $(this).attr('h'),
+				width: $(this).attr('w'),
 				modal: true,
 				buttons: {
 					submit: function() {
@@ -28,9 +28,12 @@
 								ret[$(this).attr('name')] = $(this).val();
 						});
 
-						var ajaxObj = {action : 'lxt_surveytool_savesurvey', result : JSON.stringify(ret)};
+						var ajaxObj = {action : 'lxt_surveytool_savesurvey'};
+						ajaxObj.email = ret.the_email;
+						delete ret.the_email;
+						ajaxObj.result = JSON.stringify(ret);
 						
-						jQuery.post(ajaxurl+'?XDEBUG_SESSION_START=1', ajaxObj, function( resp ) {
+						jQuery.post(ajaxurl, ajaxObj, function( resp ) {
 							alert(resp);
 						});
 
