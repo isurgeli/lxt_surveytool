@@ -1,0 +1,65 @@
+.lxt_button {
+  background-color: #2b91af;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 5px 10px;
+}
+.lxt_loading {
+  background: url(loader.gif) center center no-repeat;
+}
+.lxt_jast_popup_open {
+  background-color: #2b91af;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 5px 10px;
+}
+.lxt_jast_popup_close {
+  background-color: #2b91af;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 7px;
+  box-shadow: none;
+  font: bold 131% sans-serif;
+  position: absolute;
+  right: -7px;
+  top: -7px;
+  padding: 0 6px 2px;
+}
+.lxt_jast_popup_close:hover {
+  background-color: #1e1e1e;
+}
+.lxt_jast_popup {
+  background-color: #fff;
+  border-radius: 10px 10px 10px 10px;
+  box-shadow: 0 0 25px 5px #999;
+  color: #111;
+  display: none;
+  /*min-width:450px;*/
+  padding: 25px;
+}
+.lxt_jast_survey_title {
+  font-style: normal;
+  font-weight: bold;
+  font-size: 150%;
+}
+.lxt_jast_qust_title {
+  font-style: italic;
+  font-weight: bold;
+  font-size: 120%;
+}

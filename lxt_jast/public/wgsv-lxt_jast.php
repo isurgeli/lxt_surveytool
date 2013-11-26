@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   lxt_surveytool
+ * @package   lxt_jast
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -13,28 +13,34 @@
  * Plugin class. This class used to do the widget work for public plugin work.
  * Survey link widget.
  */
-class lxt_surveytool_wgsv extends WP_Widget {
-	protected $version;
-	protected $plugin_slug;
+class lxt_jast_wgsv extends WP_Widget {
+	protected $ver;
+	protected $slug;
+	protected $plugin;
 
-	public static function init() {
-		add_action( 'widgets_init', array ( 'lxt_surveytool_wgsv', 'register_widget' ));
-	}
-	
 	public function __construct() {
-		$surveytool = lxt_surveytool::get_instance();
-		$this->plugin_slug = $surveytool->get_plugin_slug();
-		$this->version = lxt_surveytool::VERSION;	
+		$this->plugin = lxt_jast_plugin::get_instance(); 
+		$this->slug = $this->plugin->get_slug();
+		$this->ver = $this->plugin->get_ver();
 
-		parent::__construct(
-			$this->plugin_slug.'wgsv', // Base ID
-			__('Survey panel', $this->plugin_slug), // Name
-			array( 'description' => __( 'A widget can contain survey links.', $this->plugin_slug ), ) // Args
+		parent::__construct (
+			$this->slug.'wgsv', // Base ID
+			__('Survey panel', $this->slug), // Name
+			array( 'description' => __( 'A widget can contain survey links.', $this->slug ), ) // Args
 		);
+
+		add_action( 'widgets_init', array ( $this, 'register_widget' ));
+		add_action( 'init', array ( $this, 'check_widget_used' ));
+	}
+
+	public function check_widget_used() {
+		if ( is_active_widget( false, false, $this->id_base, true ) ) {
+			do_action($this->slug . '_has_widget', $this->id_base);
+		}
 	}
 
 	public function register_widget() {
-		register_widget( 'lxt_surveytool_wgsv' );
+		register_widget( 'lxt_jast_wgsv' );
 	}
  
     //build the widget settings form
@@ -42,15 +48,8 @@ class lxt_surveytool_wgsv extends WP_Widget {
         $defaults = array( 'title' => '' );
         $instance = wp_parse_args( (array) $instance, $defaults );
         $title = $instance['title'];
-		echo '<p>'._e('Survey:', $this->plugin_slug).'<select name="'.$this->get_field_name( 'title' ).'" >';
-		$args = array(
-			'post_type' => $this->plugin_slug,
-			'orderby' => 'title',
-			'post_status' => 'publish',
-			'order' => 'ASC',
-			'posts_per_page' => -1
-		);
-		$loop = new WP_Query($args);
+		echo '<p>'._e('Survey:', $this->slug).'<select name="'.$this->get_field_name( 'title' ).'" >';
+		$loop = $this->plugin->get_pub_obj()->get_post_loop();
 		if ( $loop->have_posts() ) {
 			while ( $loop->have_posts() ) {
 				$loop->the_post();
@@ -72,12 +71,10 @@ class lxt_surveytool_wgsv extends WP_Widget {
     function widget($args, $instance) {
         extract($args);
 
-		$title = apply_filters( 'widget_title', __('Surveys panel', $this->plugin_slug) );
+		$title = apply_filters( 'widget_title', __('Surveys panel', $this->slug) );
         $surveytitle = $instance['title'];
-
-		$scObj = new lxt_surveytool_shortcode($this->plugin_slug, $this->version);
 		
-		$output = $scObj->getSurveyOutput($surveytitle, 'widget' );
+		$output = $this->plugin->get_pub_obj()->get_survey_container($surveytitle, 'widget' );
 		echo $before_widget;
 		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
 		echo $output;

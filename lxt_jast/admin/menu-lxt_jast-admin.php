@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   lxt_survey_Admin
+ * @package   lxt_jast_Admin
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -12,15 +12,17 @@
 /**
  * Plugin class. This class used to do the post work for public plugin work.
  */
-class lxt_surveytool_menu_Admin {
-	protected $version;
-	protected $plugin_slug;
-	protected $load_admin;
+class lxt_jast_menu_Admin {
+	protected $ver;
+	protected $slug;
+	protected $plugin;
+	protected $admin;
 
-	public function __construct($slug, $ver, $load) {
-		$this->plugin_slug = $slug;
-		$this->version = $ver;	
-		$this->load_admin = $load;
+	public function __construct() {
+		$this->plugin = lxt_jast_plugin::get_instance(); 
+		$this->admin = lxt_jast_plugin_Admin::get_instance(); 
+		$this->slug = $this->plugin->get_slug();
+		$this->ver = $this->plugin->get_ver();
 
 		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 	}
@@ -36,7 +38,7 @@ class lxt_surveytool_menu_Admin {
 			array( $this, 'display_survey_result_page' )
 		);
 		
-		$this->load_admin->set_screen_suffix($screen_hook_suffix);
+		do_action('lxt_set_admin_screen_id', $screen_hook_suffix);
 	}
 
 	public function display_survey_result_page() {

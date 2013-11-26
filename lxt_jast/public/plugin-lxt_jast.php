@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   lxt_surveytool
+ * @package   lxt_jast
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -12,11 +12,12 @@
 /**
  * Plugin class. This class used to do the common start work for a plugin.
  */
-class lxt_surveytool {
+class lxt_jast_plugin {
 
-	const VERSION = '1.0.0';
-
-	protected $plugin_slug = 'lxt_surveytool';
+	protected static $ver = '1.0.0';
+	protected static $slug = 'lxt_jast';
+	protected $shortcodes = null;
+	protected $pub_obj = null;
 
 	protected static $instance = null;
 
@@ -25,34 +26,50 @@ class lxt_surveytool {
 	 * and styles.
 	 */
 	private function __construct() {
-
+		self::$instance = $this;
 		// Load plugin text domain
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 		// Activate plugin when new blog is added
 		add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );
 
-		require_once( plugin_dir_path( __FILE__ ) . 'ajax-'.$this->plugin_slug.'.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'load-'.$this->plugin_slug.'.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'post-'.$this->plugin_slug.'.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-'.$this->plugin_slug.'.php' );
-		require_once( plugin_dir_path( __FILE__ ) . 'wgsv-'.$this->plugin_slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'ajax-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'load-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'post-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'wgsv-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'public-'.self::$slug.'.php' );
 
-		new lxt_surveytool_ajax($this->plugin_slug, self::VERSION);
-		new lxt_surveytool_load($this->plugin_slug, self::VERSION);
-		new lxt_surveytool_post($this->plugin_slug, self::VERSION);
-		new lxt_surveytool_shortcode($this->plugin_slug, self::VERSION);
-		lxt_surveytool_wgsv::init();
+		new lxt_jast_ajax();
+		new lxt_jast_load();
+		new lxt_jast_post();
+		$sc_obj = new lxt_jast_shortcode();
+		new lxt_jast_wgsv();
+		$this->pub_obj = new lxt_jast_pub();
+
+		$this->shortcodes = $sc_obj->get_shortcodes();
 	}
 
-	public function get_plugin_slug() {
-		return $this->plugin_slug;
+	public function get_slug() {
+		return self::$slug;
+	}
+
+	public function get_ver() {
+		return self::$ver;
+	}
+
+	public function get_shortcodes() {
+		return array_keys($this->shortcodes);
+	}
+
+	public function get_pub_obj() {
+		return $this->pub_obj;
 	}
 
 	public static function get_instance() {
 
 		// If the single instance hasn't been set, set it now.
 		if ( null == self::$instance ) {
-			self::$instance = new self;
+			new self;
 		}
 
 		return self::$instance;
@@ -154,14 +171,14 @@ class lxt_surveytool {
 	 * Fired for each blog when the plugin is activated.
 	 */
 	private static function single_activate() {
-		// @TODO: Define activation functionality here
-		If ( version_compare( get_bloginfo( 'version' ), '3.7', '<' ) ) {
-			deactivate_plugins( $this->plugin_slug ); // Deactivate our plugin
+		// Define activation functionality here
+		If ( version_compare( get_bloginfo( 'version' ), '3.5', '<' ) ) {
+			deactivate_plugins( self::$slug ); // Deactivate our plugin
 		}
 
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . $this->plugin_slug . '_surveys';
+		$table_name = $wpdb->prefix . self::$slug . '_surveys';
       
 		$sql = "CREATE TABLE $table_name (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -175,7 +192,7 @@ class lxt_surveytool {
 
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
-		add_option( "lxt_survey_db_version", self::VERSION );
+		add_option( self::$slug . '_db_version', self::$ver );
 	}
 
 	/**
@@ -187,12 +204,11 @@ class lxt_surveytool {
 
 	public function load_plugin_textdomain() {
 
-		$domain = $this->plugin_slug;
+		$domain = self::$slug;
 		$locale = apply_filters( 'plugin_locale', get_locale(), $domain );
 
 		load_textdomain( $domain, trailingslashit( WP_LANG_DIR ) . $domain . '/' . $domain . '-' . $locale . '.mo' );
 		load_plugin_textdomain( $domain, FALSE, basename( plugin_dir_path( dirname( __FILE__ ) ) ) . 'languages/' );
-
 	}
 }
 

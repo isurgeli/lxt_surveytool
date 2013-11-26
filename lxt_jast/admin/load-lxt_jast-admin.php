@@ -2,7 +2,7 @@
 /**
  * Just another survey tool.
  *
- * @package   lxt_survey_Admin
+ * @package   lxt_jast_Admin
  * @author    isurgeli@gmail.com
  * @license   GPL-2.0+
  * @link      http://isurge.wordpress.com
@@ -13,18 +13,24 @@
  * Plugin class. This class used to do the load script and css work for public plugin work.
  */
 
-class lxt_surveytool_load_Admin {
-	protected $version;
-	protected $plugin_slug;
+class lxt_jast_load_Admin {
+	protected $ver;
+	protected $slug;
 	protected $screen_hook_suffix;
+	protected $plugin;
+	protected $admin;
 
-	public function __construct($slug, $ver) {
-		$this->plugin_slug = $slug;
-		$this->version = $ver;
+	public function __construct() {
+		$this->plugin = lxt_jast_plugin::get_instance(); 
+		$this->admin = lxt_jast_plugin_Admin::get_instance(); 
+		$this->slug = $this->plugin->get_slug();
+		$this->ver = $this->plugin->get_ver();
 
 		// Load admin style sheet and JavaScript.
 		//add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_styles' ) );
 		//add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_scripts' ) );
+		//
+		add_action('lxt_set_admin_screen_id', array( $this, 'set_admin_screen_id' ));
 	}
 
 	public function common_enqueue_admin_styles() {
@@ -35,7 +41,7 @@ class lxt_surveytool_load_Admin {
 
 		$screen = get_current_screen();
 		if ( $this->screen_hook_suffix == $screen->id ) {
-			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), $this->version );
+			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), $this->ver );
 		}
 
 	}
@@ -48,11 +54,11 @@ class lxt_surveytool_load_Admin {
 
 		$screen = get_current_screen();
 		if ( $this->screen_hook_suffix == $screen->id ) {
-			wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), $this->version );
+			wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), $this->ver );
 		}
 	}
 
-	public function set_screen_suffix($screen) {
+	public function set_admin_screen_id($screen) {
 		$this->screen_hook_suffix = $screen;
 	}
 }
