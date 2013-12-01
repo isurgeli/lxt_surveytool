@@ -58,7 +58,7 @@ class lxt_jast_plugin {
 	}
 
 	public function get_shortcodes() {
-		return array_keys($this->shortcodes);
+		return $this->shortcodes;
 	}
 
 	public function get_pub_obj() {

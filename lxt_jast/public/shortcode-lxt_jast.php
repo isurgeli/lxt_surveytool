@@ -13,7 +13,7 @@
  * Plugin class. This class used to do the shortcode parse work for public plugin work.
  */
 class lxt_jast_shortcode {
-	protected $shortcodes = ['lxt_dosurvey' => 'lxt_dosurvey', 'lxt_surveyret' => 'lxt_surveyret', 'lxt_survey_qust' => 'lxt_survey_qust', 'lxt_survey_submit' => 'lxt_survey_submit'];
+	protected $shortcodes = ['lxt_dosurvey', 'lxt_surveyret', 'lxt_survey_qust', 'lxt_survey_submit', 'lxt_survey_email'];
 
 	protected $ver;
 	protected $slug;
@@ -32,25 +32,46 @@ class lxt_jast_shortcode {
 	}
 
 	public function add_plugin_shortcode() {
-		foreach ($this->shortcodes as $shortcode => $fun) {
-			add_shortcode( $shortcode, array( $this, $fun) );
+		foreach ($this->shortcodes as $shortcode) {
+			add_shortcode( $shortcode, array( $this, $shortcode) );
 		}
 	}
 
 	public function lxt_surveyret($attr) {
 		if (!$attr || !($title = $attr['title'])) return '';
+
 		$key = $attr['key'];
 
-		$questions = $this->get_survey_questions( $title , $key );
+		if (!$attr || !($width = $attr['width'])) 
+			$width = '300px';
+
+		if (!$attr || !($high = $attr['high'])) 
+			$high = '300px';
+
+		$post_data = $this->get_survey_questions( $title , $key );
+
+		$post_id = $post_data['id'];
+		$questions = $post_data['qust'];
+		$output = '';
 		foreach ($questions as $question) {
-			preg_match_all ('/(\w+)="(\w+)"/', $question, $pat_array);
+			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
+			$qust_attr = [];
 			for ($i = 0; $i < count($pat_array[0]); $i++) {
-			    $attr[$pat_array[1][i]] = $pat_array[2][i];
+				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
 			}
 
+			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' )
+				|| !isset($qust_attr['answer']) ) {
+				continue;
+			}
 
+			$key = $qust_attr['key'];
+
+			$output.= '<div class="'. $this->slug .'_result_img" id="' . $this->slug . '_' . $post_id . '_' . $key .'" style="height:' . $high .';width:' . $width .'; "></div>';
+			//get_survey_qust_data($post_id, $key);
 		}
-
+		
+		return $output;
 	}
 
 	public function get_survey_questions( $title, $key ) {
@@ -58,14 +79,16 @@ class lxt_jast_shortcode {
 
 		if ( $loop->have_posts() ) {
 			$loop->the_post();
-			$content .= get_the_content();
+			$content = get_the_content();
+			$post_id = get_the_id();
 
-			if ( isset ( $key ) ) 
-				preg_match_all ('/\['.array_keys($this->shortcodes)[2].'[^\]]+\]/', $content, $pat_array);
+			$pat_array = null;
+			if ( !isset ( $key ) ) 
+				preg_match_all ('/\['.$this->shortcodes[2].'[^\]]+\]/', $content, $pat_array);
 			else
-				preg_match_all ('/\['.array_keys($this->shortcodes)[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
+				preg_match_all ('/\['.$this->shortcodes[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
 
-			return $pat_array[0];
+			return ['id' => $post_id, 'qust' => $pat_array[0]];
 		}
 
 		return [];
@@ -120,6 +143,27 @@ class lxt_jast_shortcode {
 
 		return $output;
 	}
+
+	public function lxt_survey_email($attr) {
+
+		if (!is_array($attr) || !($title = $attr['title'])) 
+			$title= __('Please supply your email:' , $this->slug);
+
+		if (!is_array($attr) || !($title = $attr['tclass'])) 
+			$tclass=$this->slug . '_qust_title';
+
+		if (!is_array($attr) || !($title = $attr['iclass'])) 
+			$iclass=$this->slug . '_qust';
+
+
+		if ( !is_user_logged_in() ) {
+			$output .= '<label class="' . $tclass . '" >' . $title . '</label>';
+			$output .= '<input class="' . $iclass . '" type="email" name="the_email"></input>';
+		}
+
+		return $output;
+	}
+
 
 	public function lxt_dosurvey($attr) {
 		if (!$attr || !($title = $attr['title'])) return '';

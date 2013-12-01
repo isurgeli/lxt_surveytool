@@ -63,3 +63,6 @@
   font-weight: bold;
   font-size: 120%;
 }
+table.jqplot-table-legend {
+  width: auto !important;
+}

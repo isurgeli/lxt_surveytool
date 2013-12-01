@@ -33,6 +33,8 @@ class lxt_jast_load {
 		$shortcodes = $this->plugin->get_shortcodes(); 
 		if ( $shortcode == $shortcodes[0] )
 			$this->show_survey_enqueue();
+		else if ( $shortcode == $shortcodes[1] )
+			$this->show_result_enqueue();
 	}
 
 	public function has_widget_enqueue( $widgetid ) {
@@ -54,5 +56,18 @@ class lxt_jast_load {
 	}
 
 	public function show_result_enqueue() {
+		wp_enqueue_style( $this->slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), $this->ver );
+		wp_enqueue_style( 'jqplot', plugins_url( 'assets/css/jquery.jqplot.min.css', __FILE__ ), array(), '1.0.9' );
+
+		wp_enqueue_script( 'jqplot', plugins_url( 'assets/js/jquery.jqplot.min.js', __FILE__ ),  array( 'jquery' ), '1.0.9' );
+		wp_enqueue_script( 'jqplot-barRenderer', plugins_url( 'assets/js/jqplot.barRenderer.min.js', __FILE__ ),  array( 'jqplot' ), '1.0.9' );
+		wp_enqueue_script( 'jqplot-json2', plugins_url( 'assets/js/jqplot.json2.min.js', __FILE__ ),  array( 'jqplot' ), '1.0.9' );
+		wp_enqueue_script( 'jqplot-pieRenderer', plugins_url( 'assets/js/jqplot.pieRenderer.min.js', __FILE__ ),  array( 'jqplot' ), '1.0.9' );
+		wp_enqueue_script( $this->slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), $this->ver );	
+		wp_localize_script( $this->slug . '-plugin-script', 'wordpress_L10n', array(
+			'slug' => $this->slug,
+			'ver' => $this->ver,
+			'ajaxurl' => admin_url().'admin-ajax.php'
+		));
 	}
 }

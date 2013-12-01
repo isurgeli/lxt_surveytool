@@ -55,24 +55,12 @@ class lxt_jast_pub {
 	}
 
 	public function get_survey_content( $postid ) {
-		if (!($mailtitle = get_post_meta( get_the_ID(), $this->slug . '_md_mailtitle', true )))
-			$mailtitle = __('Please supply your email:', $this->slug);
-
-		if (!($mailtitleclass = get_post_meta( get_the_ID(), $this->slug . '_md_mailtitleclass', true )))
-			$mailtitleclass = $this->slug . '_qust_title';
-
-		if (!($mailinputclass = get_post_meta( get_the_ID(), $this->slug . '_md_mailinputclass', true )))
-			$mailinputclass = $this->slug.'_qust';
-
 		if (!($titleclass = get_post_meta( get_the_ID(), $this->slug . '_md_titleclass', true )))
 			$titleclass = $this->slug . '_survey_title';
 
 		$output = '<header class="' . $titleclass . '" >' . get_post_field('post_title', $postid) . '</header>';
 		$output .= apply_filters('the_content', get_post_field('post_content', $postid) );
-		if ( !is_user_logged_in() ) {
-			$output .= '<label class="' . mailtitleclass . '" >'.mailtitle.'</label>';
-			$output .= '<input class="' . mailinputclass . '" type="email" name="the_email"></input>';
-		}
+		
 		return $output;
 	}
 

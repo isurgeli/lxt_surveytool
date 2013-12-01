@@ -1,1 +1,1 @@
-xcopy /S /Y lxt_jast H:\Learn_Test\wordpress\wp-content\plugins\lxt_jast
+xcopy /S /Y lxt_jast E:\Learn_Test\wordpress\wp-content\plugins\lxt_jast
