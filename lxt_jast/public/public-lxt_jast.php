@@ -45,12 +45,12 @@ class lxt_jast_pub {
 			//$output .= 'If you can\'t get it up use<br><span class="lxt_logo">bPopup</span>';
 			$output .= '<div id="' . $this->slug . '_popup_container_' . $nonce . '"></div>';
 			$output .= '</div>';
-			$output .= '<a href="#" class="' . $this->slug . '_popup_open" target="'. $nonce . '" postid="'.get_the_ID().'">' . $link . '</a>';
+			$output .= '<a href="javascript:void(0)" class="' . $this->slug . '_popup_open" target="'. $nonce . '" postid="'.get_the_ID().'">' . $link . '</a>';
 		}
 		else {
 			$output = '';
 		}
- 
+		wp_reset_postdata(); 
 		return $output;
 	}
 

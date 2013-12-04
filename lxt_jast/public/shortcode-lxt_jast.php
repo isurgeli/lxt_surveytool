@@ -38,15 +38,15 @@ class lxt_jast_shortcode {
 	}
 
 	public function lxt_surveyret($attr) {
-		if (!$attr || !($title = $attr['title'])) return '';
-
-		$key = $attr['key'];
-
-		if (!$attr || !($width = $attr['width'])) 
-			$width = '300px';
-
-		if (!$attr || !($high = $attr['high'])) 
-			$high = '300px';
+		extract( shortcode_atts( array(
+			'title' => null,
+			'key' => null,
+			'width' => '300px',
+			'high' => '300px',
+			'type' => 'pie'
+		), $attr ) );
+		
+		if ($title == null) return '';
 
 		$post_data = $this->get_survey_questions( $title , $key );
 
@@ -65,10 +65,17 @@ class lxt_jast_shortcode {
 				continue;
 			}
 
-			$key = $qust_attr['key'];
-
-			$output.= '<div class="'. $this->slug .'_result_img" id="' . $this->slug . '_' . $post_id . '_' . $key .'" style="height:' . $high .';width:' . $width .'; "></div>';
-			//get_survey_qust_data($post_id, $key);
+			$cur_key = $qust_attr['key'];
+		
+			/*if (!isset ( $key ) ) {
+				if (!($lcalss = $qust_attr['label-class'])) 
+					$lcalss=$this->slug . '_qust_title';
+				$qust_title = $qust_attr['title'];
+				$output .= '<label class="' . $lcalss . '" >' . $qust_title . '</label>';
+			}*/
+			$qust_title = $qust_attr['title'];
+			$output.= '<div type="' .$this->slug . '_' .$type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_key . '_' 
+				. wp_create_nonce( get_the_id() ) . '" style="height:' . $high .';width:' . $width .'; ">' . $qust_title . '</div>';
 		}
 		
 		return $output;
@@ -88,27 +95,28 @@ class lxt_jast_shortcode {
 			else
 				preg_match_all ('/\['.$this->shortcodes[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
 
-			return ['id' => $post_id, 'qust' => $pat_array[0]];
-		}
 
-		return [];
+			$ret = ['id' => $post_id, 'qust' => $pat_array[0]];
+		}else{
+			$ret = [];
+		}
+		wp_reset_postdata();
+		return $ret;
 	}
 
 	public function lxt_survey_qust($attr) {
-		if (!$attr || !($key = $attr['key'])) 
+		extract( shortcode_atts( array(
+			'key' => null,
+			'title' => null,
+			'type' => 'text',
+			'lcalss' => $this->slug . '_qust_title',
+			'iclass' => $this->slug.'_qust'
+		), $attr ) );
+
+		if ($key == null) 
 			return '';
 
-		$title = $attr['title'];
-
-		if (!($type = $attr['type'])) 
-			$type="text";
-
-		if (!($lcalss = $attr['label-class'])) 
-			$lcalss=$this->slug . '_qust_title';
-
-		if (!($iclass = $attr['input-class'])) 
-			$iclass=$this->slug.'_qust';
-		else
+		if ($iclass != $iclass=$this->slug.'_qust') 
 			$iclass .= ' ' . $this->slug.'_qust';
 
 		if (($type == 'radio' || $type == 'checkbox') && !($answerstr = $attr['answer'])) 
@@ -119,7 +127,7 @@ class lxt_jast_shortcode {
 			$output .= '<input class="' . $iclass . '" type="' . $type . '" name="' . $key . '" />';
 		}else{
 			$answers = explode(";", $answerstr);
-			foreach ($answers as $answer){
+			foreach ($answers as $answer) {
 				$output .= '<label class="' . $iclass . '" ><input class="' . $iclass . '" ';
 				if ($answers[0] == $answer && $type == 'radio')
 					$output .= 'checked ';
@@ -131,12 +139,12 @@ class lxt_jast_shortcode {
 	}
 
 	public function lxt_survey_submit($attr) {
-		if (!is_array($attr) || !($title = $attr['title'])) 
-			$title= __('Submit' , $this->slug);
+		extract( shortcode_atts( array(
+			'title' => __('Submit' , $this->slug),
+			'class' => $this->slug . '_submit'
+		), $attr ) );
 
-		if (!is_array($attr) || !($class = $attr['class'])) 
-			$class=$this->slug . '_submit';
-		else
+		if ($class != $this->slug . '_submit') 
 			$class .= ' ' . $this->slug . '_submit';
 
 		$output = '<button type="button" class="' . $class . '">'. $title . '</button>';
@@ -145,16 +153,11 @@ class lxt_jast_shortcode {
 	}
 
 	public function lxt_survey_email($attr) {
-
-		if (!is_array($attr) || !($title = $attr['title'])) 
-			$title= __('Please supply your email:' , $this->slug);
-
-		if (!is_array($attr) || !($title = $attr['tclass'])) 
-			$tclass=$this->slug . '_qust_title';
-
-		if (!is_array($attr) || !($title = $attr['iclass'])) 
-			$iclass=$this->slug . '_qust';
-
+		extract( shortcode_atts( array(
+			'title' => __('Please supply your email:' , $this->slug),
+			'tclass' => $this->slug . '_qust_title',
+			'iclass' => $iclass=$this->slug . '_qust'
+		), $attr ) );
 
 		if ( !is_user_logged_in() ) {
 			$output .= '<label class="' . $tclass . '" >' . $title . '</label>';

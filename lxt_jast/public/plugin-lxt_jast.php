@@ -182,6 +182,7 @@ class lxt_jast_plugin {
       
 		$sql = "CREATE TABLE $table_name (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			postid mediumint(9) NOT NULL,
 			time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			user VARCHAR(50) DEFAULT '' NOT NULL,
 			result text NOT NULL,

@@ -27,7 +27,10 @@ class lxt_jast_ajax {
 		add_action( 'wp_ajax_'.$this->slug.'_savesurvey', array( $this, 'ajax_save_survey') );
 
 		add_action( 'wp_ajax_nopriv_'.$this->slug.'_loadsurvey', array( $this, 'ajax_load_survey') );
-		add_action( 'wp_ajax_'.$this->slug.'_loadsurvey', array( $this, 'ajax_load_survey') );	
+		add_action( 'wp_ajax_'.$this->slug.'_loadsurvey', array( $this, 'ajax_load_survey') );
+
+		add_action( 'wp_ajax_nopriv_'.$this->slug.'_getsurveyret', array( $this, 'ajax_get_survey_result') );
+		add_action( 'wp_ajax_'.$this->slug.'_getsurveyret', array( $this, 'ajax_get_survey_result') );		
 	}
 
 	public function ajax_load_survey() {
@@ -43,6 +46,7 @@ class lxt_jast_ajax {
 
 		$table_name = $wpdb->prefix . $this->slug. '_surveys';
 		$result = str_replace('\\', '', esc_sql ($_POST["result"]));
+		$post_id = esc_sql ($_POST["postid"]);
 		$user = '';
 		if (!is_user_logged_in()) {
 			$email = esc_sql ($_POST["email"]);
@@ -52,8 +56,40 @@ class lxt_jast_ajax {
 			$user = $current_user->user_login;
 		}
 		
-		$wpdb->insert( $table_name, array( 'time' => current_time('mysql'), 'user' =>  $user, 'result' => $result, email => $email ) );
+		$wpdb->insert( $table_name, array( 'time' => current_time('mysql'), 'postid' => $post_id, 'user' =>  $user, 'result' => $result, email => $email ) );
 		echo __("Thank you for your participate", $this->slug);
+		die();
+	}
+
+	public function ajax_get_survey_result() {
+		global $wpdb;
+
+		$post_id = esc_sql ($_POST["postid"]);
+		$key = esc_sql ($_POST["key"]);
+		$table_name = $wpdb->prefix . $this->slug. '_surveys';
+
+		$querystr = "SELECT " . $table_name . ".result FROM " . $table_name . " WHERE " . $table_name . ".postid = '" . $post_id . "'";
+		$rets = $wpdb->get_col( $querystr );
+
+		$data = [];
+		foreach ( $rets as $ret ) {
+			preg_match_all ('/"' . $key . '":"([^"]+)"/', $ret, $pat_array);
+
+			if (count($pat_array[0]) == 0) 
+				continue;
+
+			$answer = $pat_array[1][0];
+			$answers = explode(",", $answer);
+
+			foreach ( $answers as $single_an) {
+				if ($data[$single_an] == null)
+					$data[$single_an] = 1;
+				else
+					$data[$single_an] = $data[$single_an] + 1;
+			}
+		}
+		$data[$this->slug . '_total'] = count($rets);
+		echo json_encode($data);
 		die();
 	}
 }

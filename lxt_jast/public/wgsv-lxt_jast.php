@@ -56,7 +56,9 @@ class lxt_jast_wgsv extends WP_Widget {
 				echo '<option value="'.get_the_title().'" '.selected( $title, get_the_title() ).' >'.get_the_title().'</option>';
 			}
 		}
-        echo '</select></p>';
+		echo '</select></p>';
+
+		wp_reset_postdata();
     }
  
     //save the widget settings
