@@ -23,7 +23,9 @@ class lxt_jast_post {
 		$this->ver = $this->plugin->get_ver();
 
 		add_action( 'init', array( $this, 'add_plugin_posttype' ) );
-		add_action( 'the_posts', array( $this, 'post_has_shortcode') );
+		if (! is_admin()) {
+			add_action( 'the_posts', array( $this, 'post_has_shortcode') );
+		}
 	}
 
 	public function add_plugin_posttype() {
@@ -64,7 +66,7 @@ class lxt_jast_post {
 			foreach ($shortcodes as $shortcode) {
 				preg_match ('/\['.$shortcode.'[\s\]]/', $post->post_content, $pat_array);
 
-				if ( count($pat_array[0]) > 0 ) {
+				if ( is_array($pat_array) && !empty($pat_array) && count($pat_array[0]) > 0 ) {
 					do_action($this->slug . '_post_has_shortcode', $shortcode);
 					break;
 				}

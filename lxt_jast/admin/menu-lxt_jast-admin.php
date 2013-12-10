@@ -30,11 +30,11 @@ class lxt_jast_menu_Admin {
 	public function add_plugin_admin_menu() {
 
 		$screen_hook_suffix = add_submenu_page( 
-			'edit.php?post_type='.$this->plugin_slug, 
-			__( 'View survey results', $this->plugin_slug ),
-			__( 'Survey results', $this->plugin_slug ),
+			'edit.php?post_type='.$this->slug, 
+			__( 'View survey results', $this->slug ),
+			__( 'Survey results', $this->slug ),
 			'manage_options',
-			$this->plugin_slug.'_results',
+			$this->slug.'_results',
 			array( $this, 'display_survey_result_page' )
 		);
 		
@@ -42,7 +42,7 @@ class lxt_jast_menu_Admin {
 	}
 
 	public function display_survey_result_page() {
-		include_once( 'views/admin.php' );
+		include_once( 'views/lxt_jast_admin_results.php' );
 	}
 }
 

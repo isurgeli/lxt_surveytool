@@ -44,6 +44,7 @@ class lxt_jast_post_Admin {
 		$style = get_post_meta( $post->ID, $this->slug . '_md_style', true );
 		$visibility = get_post_meta( $post->ID, $this->slug . '_md_visibility', true );		
 		$link = get_post_meta( $post->ID, $this->slug . '_md_link', true );
+		$per_page = get_post_meta( $post->ID, $this->slug . '_md_perpage', true );
  
 		//_e( 'Please set the survey property', $this->slug );
 		?>
@@ -58,6 +59,7 @@ class lxt_jast_post_Admin {
 			</option>
 		</select>
 		<?php echo esc_attr__( 'Link:', $this->slug); ?> <input type="text" name="<?php echo $this->slug ?>_md_field_link" value="<?php echo esc_attr( $link ); ?>"/>
+		<?php echo esc_attr__( 'Result per page:', $this->slug); ?> <input type="text" name="<?php echo $this->slug ?>_md_perpage" value="<?php echo esc_attr( $per_page ); ?>"/>
 		<?php echo esc_attr__( 'Style:', $this->slug); ?> <input type="text" size="100" name="<?php echo $this->slug ?>_md_field_style" value="<?php echo esc_attr( $style ); ?>"/>
 		</p>
     <?php
@@ -71,6 +73,7 @@ class lxt_jast_post_Admin {
 			update_post_meta( $post_id, $this->slug . '_md_style', strip_tags( $_POST[$this->slug.'_md_field_style'] ) );
 			update_post_meta( $post_id, $this->slug . '_md_visibility',strip_tags( $_POST[$this->slug.'_md_field_visibility'] ) );
 			update_post_meta( $post_id, $this->slug . '_md_link',strip_tags( $_POST[$this->slug.'_md_field_link'] ) );
+			update_post_meta( $post_id, $this->slug . '_md_perpage',strip_tags( $_POST[$this->slug.'_md_perpage'] ) );
 		}
 	}
 }

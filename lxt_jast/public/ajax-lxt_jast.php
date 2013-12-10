@@ -30,7 +30,44 @@ class lxt_jast_ajax {
 		add_action( 'wp_ajax_'.$this->slug.'_loadsurvey', array( $this, 'ajax_load_survey') );
 
 		add_action( 'wp_ajax_nopriv_'.$this->slug.'_getsurveyret', array( $this, 'ajax_get_survey_result') );
-		add_action( 'wp_ajax_'.$this->slug.'_getsurveyret', array( $this, 'ajax_get_survey_result') );		
+		add_action( 'wp_ajax_'.$this->slug.'_getsurveyret', array( $this, 'ajax_get_survey_result') );
+
+		if (is_admin()){
+			add_action( 'wp_ajax_'.$this->slug.'_chart_frame', array( $this, 'ajax_get_chart_frame') );		
+			add_action( 'wp_ajax_'.$this->slug.'_text_frame', array( $this, 'ajax_get_text_frame') );	
+			add_action( 'wp_ajax_'.$this->slug.'_text_table', array( $this, 'ajax_get_text_table') );	
+		}
+	}
+
+	public function ajax_get_chart_frame() {
+		$title = $_POST["title"];
+	
+		echo $this->plugin->get_pub_obj()->get_survey_chart_frame($title, null, null, '50%', '300px');
+		die();
+	}
+
+	public function ajax_get_text_frame() {
+		$title = $_POST["title"];
+
+		if ( !array_key_exists ('page', $_REQUEST) )
+			$_REQUEST['page'] = 0;
+	
+		echo $this->plugin->get_pub_obj()->get_survey_text_frame($title);
+		die();
+	}
+
+	public function ajax_get_text_table() {
+		$screen_id = $_POST["screen_id"];
+		$key = $_POST["key"];
+		$post_id = $_POST["post_id"];
+
+		require_once (plugin_dir_path(__FILE__) . '..\admin\views\lxt_jast_result_table.php');
+
+	    $testListTable = new lxt_jast_result_table( $screen_id, $post_id, $key);
+		$testListTable->prepare_items();
+		$testListTable->display();
+
+		die();
 	}
 
 	public function ajax_load_survey() {
@@ -50,13 +87,14 @@ class lxt_jast_ajax {
 		$user = '';
 		if (!is_user_logged_in()) {
 			$email = esc_sql ($_POST["email"]);
+			$user = __('Visitor', $this->slug);
 		}else{
 			get_currentuserinfo();
 			$email = $current_user->user_email;
 			$user = $current_user->user_login;
 		}
 		
-		$wpdb->insert( $table_name, array( 'time' => current_time('mysql'), 'postid' => $post_id, 'user' =>  $user, 'result' => $result, email => $email ) );
+		$wpdb->insert( $table_name, array( 'time' => current_time('mysql'), 'postid' => $post_id, 'user' =>  $user, 'result' => $result, 'email' => $email ) );
 		echo __("Thank you for your participate", $this->slug);
 		die();
 	}
@@ -82,7 +120,7 @@ class lxt_jast_ajax {
 			$answers = explode(",", $answer);
 
 			foreach ( $answers as $single_an) {
-				if ($data[$single_an] == null)
+				if ( !array_key_exists( $single_an, $data) )
 					$data[$single_an] = 1;
 				else
 					$data[$single_an] = $data[$single_an] + 1;

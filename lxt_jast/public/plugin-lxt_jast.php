@@ -43,10 +43,16 @@ class lxt_jast_plugin {
 		new lxt_jast_load();
 		new lxt_jast_post();
 		$sc_obj = new lxt_jast_shortcode();
-		new lxt_jast_wgsv();
+		//new lxt_jast_wgsv();
 		$this->pub_obj = new lxt_jast_pub();
 
 		$this->shortcodes = $sc_obj->get_shortcodes();
+
+		$this->register_widgets();
+	}
+
+	private function register_widgets() {
+		add_action( 'widgets_init', array ( 'lxt_jast_wgsv', 'register_widget' ));
 	}
 
 	public function get_slug() {

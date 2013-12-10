@@ -27,8 +27,8 @@ class lxt_jast_load_Admin {
 		$this->ver = $this->plugin->get_ver();
 
 		// Load admin style sheet and JavaScript.
-		//add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_styles' ) );
-		//add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'common_enqueue_admin_scripts' ) );
 		//
 		add_action('lxt_set_admin_screen_id', array( $this, 'set_admin_screen_id' ));
 	}
@@ -41,7 +41,7 @@ class lxt_jast_load_Admin {
 
 		$screen = get_current_screen();
 		if ( $this->screen_hook_suffix == $screen->id ) {
-			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), $this->ver );
+			wp_enqueue_style( $this->slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), $this->ver );
 		}
 
 	}
@@ -54,7 +54,15 @@ class lxt_jast_load_Admin {
 
 		$screen = get_current_screen();
 		if ( $this->screen_hook_suffix == $screen->id ) {
-			wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), $this->ver );
+			wp_enqueue_script( 'highcharts', plugins_url( '../public/assets/js/highcharts.js', __FILE__ ),  array( 'jquery' ), '1.0.9' );
+			wp_enqueue_script( $this->slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), $this->ver );
+			wp_localize_script( $this->slug . '-admin-script', 'wordpress_L10n', array(
+				'slug' => $this->slug,
+				'ver' => $this->ver,
+				'ajaxurl' => admin_url().'admin-ajax.php',
+				'choiceLabel' => __('People selected'),
+				'pubjsurl' => plugins_url( '../public/assets/js/', __FILE__ )
+			));
 		}
 	}
 

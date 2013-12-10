@@ -10,7 +10,7 @@
  */
 class lxt_public_lib {
 	
-	public function post_query_title_filter($where, &$wp_query)
+	public static function post_query_title_filter($where, &$wp_query)
     {
 		global $wpdb;
         if ( $search_term = $wp_query->get( 'search_prod_title' ) ) {

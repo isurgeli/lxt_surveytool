@@ -23,7 +23,6 @@ class lxt_jast_shortcode {
 		$this->plugin = lxt_jast_plugin::get_instance(); 
 		$this->slug = $this->plugin->get_slug();
 		$this->ver = $this->plugin->get_ver();
-
 		add_action( 'init', array( $this, 'add_plugin_shortcode' ) );
 	}
 
@@ -43,65 +42,10 @@ class lxt_jast_shortcode {
 			'key' => null,
 			'width' => '300px',
 			'high' => '300px',
-			'type' => 'pie'
+			'type' => null
 		), $attr ) );
-		
-		if ($title == null) return '';
 
-		$post_data = $this->get_survey_questions( $title , $key );
-
-		$post_id = $post_data['id'];
-		$questions = $post_data['qust'];
-		$output = '';
-		foreach ($questions as $question) {
-			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
-			$qust_attr = [];
-			for ($i = 0; $i < count($pat_array[0]); $i++) {
-				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
-			}
-
-			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' )
-				|| !isset($qust_attr['answer']) ) {
-				continue;
-			}
-
-			$cur_key = $qust_attr['key'];
-		
-			/*if (!isset ( $key ) ) {
-				if (!($lcalss = $qust_attr['label-class'])) 
-					$lcalss=$this->slug . '_qust_title';
-				$qust_title = $qust_attr['title'];
-				$output .= '<label class="' . $lcalss . '" >' . $qust_title . '</label>';
-			}*/
-			$qust_title = $qust_attr['title'];
-			$output.= '<div type="' .$this->slug . '_' .$type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_key . '_' 
-				. wp_create_nonce( get_the_id() ) . '" style="height:' . $high .';width:' . $width .'; ">' . $qust_title . '</div>';
-		}
-		
-		return $output;
-	}
-
-	public function get_survey_questions( $title, $key ) {
-		$loop = $this->plugin->get_pub_obj()->get_post_loop( $title );
-
-		if ( $loop->have_posts() ) {
-			$loop->the_post();
-			$content = get_the_content();
-			$post_id = get_the_id();
-
-			$pat_array = null;
-			if ( !isset ( $key ) ) 
-				preg_match_all ('/\['.$this->shortcodes[2].'[^\]]+\]/', $content, $pat_array);
-			else
-				preg_match_all ('/\['.$this->shortcodes[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
-
-
-			$ret = ['id' => $post_id, 'qust' => $pat_array[0]];
-		}else{
-			$ret = [];
-		}
-		wp_reset_postdata();
-		return $ret;
+		return $this->plugin->get_pub_obj()->get_survey_chart_frame($title, $key, $type, $width, $high);
 	}
 
 	public function lxt_survey_qust($attr) {
@@ -123,7 +67,10 @@ class lxt_jast_shortcode {
 			return __('Error, no option answer.', $this->slug);
 
 		$output = '<label class="' . $lcalss . '" >' . $title . '</label>';
-		if ($type != 'radio' && $type != 'checkbox') {
+		
+		if ($type == 'textarea') {
+			$output .= '<textarea rows="3" class="' . $iclass . '" name="' . $key . '" />';
+		}else if ($type != 'radio' && $type != 'checkbox') {
 			$output .= '<input class="' . $iclass . '" type="' . $type . '" name="' . $key . '" />';
 		}else{
 			$answers = explode(";", $answerstr);
@@ -158,10 +105,10 @@ class lxt_jast_shortcode {
 			'tclass' => $this->slug . '_qust_title',
 			'iclass' => $iclass=$this->slug . '_qust'
 		), $attr ) );
-
+		$output = "";
 		if ( !is_user_logged_in() ) {
 			$output .= '<label class="' . $tclass . '" >' . $title . '</label>';
-			$output .= '<input class="' . $iclass . '" type="email" name="the_email"></input>';
+			$output .= '<input class="' . $iclass . '" type="email" name="' . $this->slug . '_the_email"></input>';
 		}
 
 		return $output;

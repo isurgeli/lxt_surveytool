@@ -29,17 +29,16 @@ class lxt_jast_wgsv extends WP_Widget {
 			array( 'description' => __( 'A widget can contain survey links.', $this->slug ), ) // Args
 		);
 
-		add_action( 'widgets_init', array ( $this, 'register_widget' ));
-		add_action( 'init', array ( $this, 'check_widget_used' ));
+		//add_action( 'init', array ( $this, 'check_widget_used' ));
 	}
 
-	public function check_widget_used() {
-		if ( is_active_widget( false, false, $this->id_base, true ) ) {
-			do_action($this->slug . '_has_widget', $this->id_base);
-		}
-	}
+//	public function check_widget_used() {
+//		if ( is_active_widget( false, false, $this->id_base, true ) ) {
+//			do_action($this->slug . '_has_widget', $this->id_base);
+//		}
+//	}
 
-	public function register_widget() {
+	public static function register_widget() {
 		register_widget( 'lxt_jast_wgsv' );
 	}
  
@@ -70,7 +69,9 @@ class lxt_jast_wgsv extends WP_Widget {
     }
  
     //display the widget
-    function widget($args, $instance) {
+	function widget($args, $instance) {
+		do_action($this->slug . '_has_widget', $this->id_base);
+
         extract($args);
 
 		$title = apply_filters( 'widget_title', __('Surveys panel', $this->slug) );

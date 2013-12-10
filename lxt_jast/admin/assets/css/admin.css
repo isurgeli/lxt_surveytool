@@ -1,1 +1,36 @@
-/* This stylesheet is used to style the admin option form of the plugin. */
+.lxt_select_panel {
+  margin-top: 23px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  border: 1px solid #eee;
+  background: #fbfbfb;
+}
+div.lxt_jast_select_survey {
+  margin-top: 23px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  border: 1px solid #eee;
+  background: #fbfbfb;
+}
+div.lxt_jast_select_qust {
+  margin-top: 23px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  border: 1px solid #eee;
+  background: #fbfbfb;
+}
+.wp-list-table .column-user {
+  width: 5%;
+}
+.wp-list-table .column-email {
+  width: 10%;
+}
+.wp-list-table .column-content {
+  width: 75%;
+}
+.wp-list-table .column-date {
+  width: 10%;
+}

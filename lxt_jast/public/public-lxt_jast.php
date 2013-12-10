@@ -55,7 +55,7 @@ class lxt_jast_pub {
 	}
 
 	public function get_survey_content( $postid ) {
-		if (!($titleclass = get_post_meta( get_the_ID(), $this->slug . '_md_titleclass', true )))
+		if (!($titleclass = get_post_meta( $postid, $this->slug . '_md_titleclass', true )))
 			$titleclass = $this->slug . '_survey_title';
 
 		$output = '<header class="' . $titleclass . '" >' . get_post_field('post_title', $postid) . '</header>';
@@ -84,6 +84,98 @@ class lxt_jast_pub {
 		}
 
 		return $loop;
+	}
+
+	public function get_survey_chart_frame($title, $key, $type, $width, $high) {		
+		if ($title == null) return '';
+
+		$post_data = $this->get_survey_questions( $title , $key );
+
+		$post_id = $post_data['id'];
+		$questions = $post_data['qust'];
+		$output = '';
+		foreach ($questions as $question) {
+			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
+			$qust_attr = [];
+			for ($i = 0; $i < count($pat_array[0]); $i++) {
+				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
+			}
+
+			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' )
+				|| !isset($qust_attr['answer']) ) {
+				continue;
+			}
+
+			if ( isset( $type ) ) {
+				$qust_type = $type;
+			}else{
+				if ($qust_attr['type'] == 'radio')
+					$qust_type = 'pie';
+				else
+					$qust_type = 'bar';
+			}
+
+
+			$cur_key = $qust_attr['key'];
+		
+			$qust_title = $qust_attr['title'];
+			$output.= '<div type="' .$this->slug . '_' .$qust_type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_key . '_' 
+				. wp_create_nonce( get_the_id() ) . '" style="height:' . $high .';width:' . $width .'; " title="' . $qust_title . '" ></div>';
+		}
+		
+		return $output;
+	}
+
+	public function get_survey_text_frame($title) {
+		if ($title == null) return '';
+
+		$post_data = $this->get_survey_questions( $title , null );
+
+		$post_id = $post_data['id'];
+		$questions = $post_data['qust'];
+		$output = '<div class="lxt_jast_select_qust"><span class="lxt_jast_select_action">';
+		$output .= __('Please select the question: ', $this->slug); 
+		$output .= '<select id="' . $this->slug . '_survey_qust" >';
+		$output .= '<option value=""></option>';
+	
+		foreach ($questions as $question) {
+			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
+			$qust_attr = [];
+			for ($i = 0; $i < count($pat_array[0]); $i++) {
+				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
+			}
+
+			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) {
+				$output .=  '<option value="'.$qust_attr['key'].'">'.$qust_attr['title'].'</option>';
+			}
+		}
+		$output .= '</select>';
+		$output .= '</span></div>';
+		$output .= '<div class="lxt_jast_result_table" id="' . $this->slug . '_rettable_' . $post_id . '" />';
+		return $output;
+	}
+
+	public function get_survey_questions( $title, $key ) {
+		$loop = $this->plugin->get_pub_obj()->get_post_loop( $title );
+
+		if ( $loop->have_posts() ) {
+			$loop->the_post();
+			$content = get_the_content();
+			$post_id = get_the_id();
+
+			$pat_array = null;
+			if ( !isset ( $key ) ) 
+				preg_match_all ('/\['.$this->plugin->get_shortcodes()[2].'[^\]]+\]/', $content, $pat_array);
+			else
+				preg_match_all ('/\['.$this->plugin->get_shortcodes()[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
+
+
+			$ret = ['id' => $post_id, 'qust' => $pat_array[0]];
+		}else{
+			$ret = [];
+		}
+		wp_reset_postdata();
+		return $ret;
 	}
 }
 

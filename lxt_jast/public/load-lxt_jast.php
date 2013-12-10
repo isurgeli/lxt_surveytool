@@ -23,10 +23,10 @@ class lxt_jast_load {
 		$this->slug = $this->plugin->get_slug();
 		$this->ver = $this->plugin->get_ver();
 
-		//add_action( 'wp_enqueue_scripts', array( $this, 'common_enqueue_styles' ) );
-		//add_action( 'wp_enqueue_scripts', array( $this, 'common_enqueue_scripts' ) );
-		add_action( $this->slug . '_post_has_shortcode', array( $this, 'has_shortcode_enqueue') );	
-		add_action( $this->slug . '_has_widget', array( $this, 'has_widget_enqueue') );	
+		if (! is_admin()) {
+			add_action( $this->slug . '_post_has_shortcode', array( $this, 'has_shortcode_enqueue') );	
+			add_action( $this->slug . '_has_widget', array( $this, 'has_widget_enqueue') );	
+		}
 	}
 
 	public function has_shortcode_enqueue( $shortcode ) {
@@ -64,7 +64,8 @@ class lxt_jast_load {
 			'slug' => $this->slug,
 			'ver' => $this->ver,
 			'ajaxurl' => admin_url().'admin-ajax.php',
-			'choiceLabel' => 'People selected'
+			'choiceLabel' => __('People selected'),
+			'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
 		));
 	}
 }

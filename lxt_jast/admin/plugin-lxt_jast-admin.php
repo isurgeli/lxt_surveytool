@@ -29,14 +29,12 @@ class lxt_jast_plugin_Admin {
 		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->slug . '.php' );
 		add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
 
-		require_once( plugin_dir_path( __FILE__ ) . 'ajax-'.$this->slug.'-admin.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'load-'.$this->slug.'-admin.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'post-'.$this->slug.'-admin.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'menu-'.$this->slug.'-admin.php' );
 
 		new lxt_jast_load_Admin();
 		new lxt_jast_menu_Admin();
-		new lxt_jast_ajax_Admin();
 		new lxt_jast_post_Admin();
 		
 	}
