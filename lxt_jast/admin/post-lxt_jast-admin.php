@@ -39,28 +39,39 @@ class lxt_jast_post_Admin {
 	}
 
 	public function lxt_jast_posttype_metabox( $post ) {
- 
-		//retrieve the metadata values if they exist
-		$style = get_post_meta( $post->ID, $this->slug . '_md_style', true );
-		$visibility = get_post_meta( $post->ID, $this->slug . '_md_visibility', true );		
-		$link = get_post_meta( $post->ID, $this->slug . '_md_link', true );
-		$per_page = get_post_meta( $post->ID, $this->slug . '_md_perpage', true );
- 
-		//_e( 'Please set the survey property', $this->slug );
+		$survey_meta = $this->plugin->get_survey_meta();
+		$attr = $this->plugin->get_pub_obj()->get_survey_meta_data( $post->ID ); 
+		extract( shortcode_atts( array(
+				'visibility' => __('All', $this->slug),
+				'class' => '',
+				'linktext' => '',
+				'linkclass' => '',
+				'closeclass' => '',
+				'perpage' => 5
+			), $attr ) );
 		?>
 		<p>
-		<?php echo esc_attr__( 'Visibility:', $this->slug); ?>
-		<select name="<?php echo $this->slug ?>_md_field_visibility">
-			<option value="<?php echo esc_attr__( 'All', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'All', $this->slug) ); ?>>
-				<?php echo esc_attr__( 'All', $this->slug); ?>
-			</option>
-			<option value="<?php echo esc_attr__( 'Login user', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'Login user', $this->slug) ); ?>>
-				<?php echo esc_attr__( 'Login user', $this->slug); ?>
-			</option>
-		</select>
-		<?php echo esc_attr__( 'Link:', $this->slug); ?> <input type="text" name="<?php echo $this->slug ?>_md_field_link" value="<?php echo esc_attr( $link ); ?>"/>
-		<?php echo esc_attr__( 'Result per page:', $this->slug); ?> <input type="text" name="<?php echo $this->slug ?>_md_perpage" value="<?php echo esc_attr( $per_page ); ?>"/>
-		<?php echo esc_attr__( 'Style:', $this->slug); ?> <input type="text" size="100" name="<?php echo $this->slug ?>_md_field_style" value="<?php echo esc_attr( $style ); ?>"/>
+		<div style="display: table;">
+		<?php foreach([['visibility', 'linktext', 'perpage'], ['class', 'linkclass', 'closeclass']] as $group) {?>
+			<div style="display: table-row;">
+			<?php foreach($group as $item) {?>
+				<label style="display: table-cell"><?php echo esc_attr__( $survey_meta[$item], $this->slug); ?></label>
+				<?php if ($item != 'visibility') {?>
+					<input style="display: table-cell" type="text" name="<?php echo $this->slug ?>_md_field_<?php echo $item ?>" value="<?php echo esc_attr( $$item ); ?>"/>
+				<?php } else { ?>
+					<select style="display: table-cell;width: 100%" name="<?php echo $this->slug ?>_md_field_visibility">
+						<option value="<?php echo esc_attr__( 'All', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'All', $this->slug) ); ?>>
+							<?php echo esc_attr__( 'All', $this->slug); ?>
+						</option>
+						<option value="<?php echo esc_attr__( 'Login user', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'Login user', $this->slug) ); ?>>
+							<?php echo esc_attr__( 'Login user', $this->slug); ?>
+						</option>
+					</select>
+				<?php } ?>
+			<?php } ?>
+			</div>
+		<?php } ?>
+		</div>
 		</p>
     <?php
  
@@ -69,11 +80,9 @@ class lxt_jast_post_Admin {
 	public function lxt_jast_save_meta( $post_id ) {
 		//verify the metadata is set
 		if ( isset( $_POST[$this->slug.'_md_field_visibility'] ) ) {
-			//save the metadata
-			update_post_meta( $post_id, $this->slug . '_md_style', strip_tags( $_POST[$this->slug.'_md_field_style'] ) );
-			update_post_meta( $post_id, $this->slug . '_md_visibility',strip_tags( $_POST[$this->slug.'_md_field_visibility'] ) );
-			update_post_meta( $post_id, $this->slug . '_md_link',strip_tags( $_POST[$this->slug.'_md_field_link'] ) );
-			update_post_meta( $post_id, $this->slug . '_md_perpage',strip_tags( $_POST[$this->slug.'_md_perpage'] ) );
+			$survey_meta = $this->plugin->get_survey_meta();
+			foreach($survey_meta as $key => $value) 
+				update_post_meta( $post_id, $this->slug . '_md_' . $key, strip_tags( $_POST[$this->slug.'_md_field_' . $key] ) );
 		}
 	}
 }

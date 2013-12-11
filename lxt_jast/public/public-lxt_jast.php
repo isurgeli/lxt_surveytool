@@ -16,6 +16,7 @@ class lxt_jast_pub {
 	protected $ver;
 	protected $slug;
 	protected $plugin;
+	protected static $is_local;
 
 	public function __construct() {
 		$this->plugin = lxt_jast_plugin::get_instance(); 
@@ -23,29 +24,53 @@ class lxt_jast_pub {
 		$this->ver = $this->plugin->get_ver();
 	}
 
+	public function get_survey_meta_data($post_id) {
+		$attr = [];
+		$survey_meta = $this->plugin->get_survey_meta();
+
+		foreach($survey_meta as $key => $value) {
+			$v = get_post_meta( $post_id, $this->slug . '_md_' . $key, true );
+			if ( $v ) 
+				$attr[$key] = $v;
+		}
+
+		return $attr;
+	}
+
+	public function add_class( &$str, $class ) {
+		if ( strpos( $str, $class) )
+			$str = $str . ' ' . $class;
+	}
+
 	public function get_survey_container( $title, $context) {
 		$loop = $this->get_post_loop( $title );
 
 		if ( $loop->have_posts() ) {
 			$loop->the_post();
-			if (!($style = get_post_meta( get_the_ID(), $this->slug . '_md_style', true )))
-				$style = '';
-			if (!($visibility = get_post_meta( get_the_ID(), $this->slug . '_md_visibility', true )))
-				$visibility = __('All', $this->slug);
-			if (!($link = get_post_meta( get_the_ID(), $this->slug . '_md_link', true )))
-				$link = get_the_title();
+			$attr = $this->get_survey_meta_data( get_the_ID() );
 
-			if ( !is_user_logged_in() && $visibility != __('All', $this->slug))
+			$attr = shortcode_atts( array(
+				'visibility' => __('All', $this->slug),
+				'class' => $this->slug . '_popup',
+				'linktext' => get_the_title(),
+				'linkclass' => $this->slug . '_popup_open',
+				'closeclass' => $this->slug . '_popup_close',
+				'nonce' =>  wp_create_nonce($context),
+				'slug' => $this->slug,
+				'post_id' => get_the_ID()
+			), $attr );
+
+			if ( !is_user_logged_in() && $attr['visibility'] != __('All', $this->slug))
 				return '';
 
-			$nonce = wp_create_nonce($context);
+			$this->add_class( $attr['linkclass'], $this->slug . '_popup_open'); 
+			$this->add_class( $attr['closeclass'], $this->slug . '_popup_close'); 
 
-			$output = '<div style="' . $style . '" class="'. $this->slug . '_popup" id="'. $this->slug . '_popup_' . $nonce . '" >';
-			$output .= '<span class="' . $this->slug . '_popup_close"><span>X</span></span>';
-			//$output .= 'If you can\'t get it up use<br><span class="lxt_logo">bPopup</span>';
-			$output .= '<div id="' . $this->slug . '_popup_container_' . $nonce . '"></div>';
-			$output .= '</div>';
-			$output .= '<a href="javascript:void(0)" class="' . $this->slug . '_popup_open" target="'. $nonce . '" postid="'.get_the_ID().'">' . $link . '</a>';
+			$temp = '<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span></div>'; 
+			//$temp .= '<div id="{$slug}_popup_container_{$nonce}"></div></div>';
+			$temp .= '<a href="javascript:void(0)" class="{$linkclass}" target="{$nonce}" postid="{$post_id}">{$linktext}</a>';
+
+			$output = lxt_public_lib::smarty_template_array($temp, $attr); 
 		}
 		else {
 			$output = '';
@@ -55,13 +80,10 @@ class lxt_jast_pub {
 	}
 
 	public function get_survey_content( $postid ) {
-		if (!($titleclass = get_post_meta( $postid, $this->slug . '_md_titleclass', true )))
-			$titleclass = $this->slug . '_survey_title';
-
-		$output = '<header class="' . $titleclass . '" >' . get_post_field('post_title', $postid) . '</header>';
-		$output .= apply_filters('the_content', get_post_field('post_content', $postid) );
-		
-		return $output;
+?>
+		<header><?php get_post_field('post_title', $postid) ?></header>
+<?php
+		echo apply_filters('the_content', get_post_field('post_content', $postid) );
 	}
 
 	function get_post_loop( $title ) {
@@ -74,7 +96,6 @@ class lxt_jast_pub {
 			'search_prod_title' => $title
 		);
 		if ( isset( $title) ) {
-			require_once( plugin_dir_path( __FILE__ ).'../lib/lxt_public_lib.php' );
 			add_filter( 'posts_where', array('lxt_public_lib', 'post_query_title_filter'), 10, 2 );
 		}
 		$loop = new WP_Query($args);
@@ -176,6 +197,20 @@ class lxt_jast_pub {
 		}
 		wp_reset_postdata();
 		return $ret;
+	}
+
+	public function localize_script_const($handle) {
+		if (! self::$is_local) {
+			wp_localize_script( $handle, 'lxt_jast_local_const', array(
+				'slug' => $this->slug,
+				'ver' => $this->ver,
+//				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
+				'ajaxurl' => admin_url().'admin-ajax.php',
+				'choiceLabel' => __("'s Choice"),
+				'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
+			));
+			self::$is_local = true;
+		}
 	}
 }
 

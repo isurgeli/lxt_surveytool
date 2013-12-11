@@ -1,10 +1,10 @@
 (function ( $ ) {
 	"use strict";
 	$.lxt_jast = new Object();
-	var external = wordpress_L10n;
+	var external = lxt_jast_local_const;
 	$.lxt_jast.slug = external.slug,
 	$.lxt_jast.ver = external.ver,
-	$.lxt_jast.ajaxurl = external.ajaxurl+'?XDEBUG_SESSION_START=1',
+	$.lxt_jast.ajaxurl = external.ajaxurl,
 	$.lxt_jast.choiceLabel = external.choiceLabel;
 	$.lxt_jast.pubjsdir = external.pubjsurl;
 
@@ -22,10 +22,10 @@
 				loadUrl: $.lxt_jast.ajaxurl,
 				loadData: {action : $.lxt_jast.slug+'_loadsurvey', id : postid},
 				content: 'ajax',
-				contentContainer:'#'+$.lxt_jast.slug+'_popup_container_'+targetid,
+				contentContainer: '#'+$.lxt_jast.slug+'_popup_'+targetid,//'#'+$.lxt_jast.slug+'_popup_container_'+targetid,
 				loadCallback: function() { 
-					$('#'+$.lxt_jast.slug+'_popup_container_'+targetid+' .'+$.lxt_jast.slug+'_submit').click(function() {
-						var allFields = $('#'+$.lxt_jast.slug+'_popup_container_'+targetid+' .'+$.lxt_jast.slug+'_qust[name]');
+					$('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_submit').click(function() {
+						var allFields = $('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_qust[name]');
 						var ret = {};
 						allFields.each(function() {
 							ret[$(this).attr('name')] = '';

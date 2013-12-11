@@ -56,13 +56,7 @@ class lxt_jast_load_Admin {
 		if ( $this->screen_hook_suffix == $screen->id ) {
 			wp_enqueue_script( 'highcharts', plugins_url( '../public/assets/js/highcharts.js', __FILE__ ),  array( 'jquery' ), '1.0.9' );
 			wp_enqueue_script( $this->slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), $this->ver );
-			wp_localize_script( $this->slug . '-admin-script', 'wordpress_L10n', array(
-				'slug' => $this->slug,
-				'ver' => $this->ver,
-				'ajaxurl' => admin_url().'admin-ajax.php',
-				'choiceLabel' => __('People selected'),
-				'pubjsurl' => plugins_url( '../public/assets/js/', __FILE__ )
-			));
+			$this->plugin->get_pub_obj()->localize_script_const( $this->slug . '-admin-script' );	
 		}
 	}
 

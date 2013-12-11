@@ -44,15 +44,11 @@ class lxt_jast_load {
 
 	public function show_survey_enqueue() {
 		wp_enqueue_style( $this->slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), $this->ver );
-		wp_enqueue_style( 'pure', plugins_url( 'assets/css/pure-min.css', __FILE__ ), array(), '0.3.0' );
+		//wp_enqueue_style( 'pure', plugins_url( 'assets/css/pure-min.css', __FILE__ ), array(), '0.3.0' );
 
 		wp_enqueue_script( 'jquery-bPopup', plugins_url( 'assets/js/jquery.bpopup.min.js', __FILE__ ),  array( 'jquery' ), '0.9.4' );
 		wp_enqueue_script( $this->slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), $this->ver );	
-		wp_localize_script( $this->slug . '-plugin-script', 'wordpress_L10n', array(
-			'slug' => $this->slug,
-			'ver' => $this->ver,
-			'ajaxurl' => admin_url().'admin-ajax.php'
-		));	
+		$this->plugin->get_pub_obj()->localize_script_const( $this->slug . '-plugin-script' );	
 	}
 
 	public function show_result_enqueue() {
@@ -60,12 +56,6 @@ class lxt_jast_load {
 
 		wp_enqueue_script( 'highcharts', plugins_url( 'assets/js/highcharts.js', __FILE__ ),  array( 'jquery' ), '1.0.9' );
 		wp_enqueue_script( $this->slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), $this->ver );	
-		wp_localize_script( $this->slug . '-plugin-script', 'wordpress_L10n', array(
-			'slug' => $this->slug,
-			'ver' => $this->ver,
-			'ajaxurl' => admin_url().'admin-ajax.php',
-			'choiceLabel' => __('People selected'),
-			'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
-		));
+		$this->plugin->get_pub_obj()->localize_script_const( $this->slug . '-plugin-script' );
 	}
 }

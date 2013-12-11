@@ -13,6 +13,7 @@
  * Plugin class. This class used to do the post work for public plugin work.
  */
 class lxt_jast_post {
+	protected $meta = null;
 	protected $ver;
 	protected $slug;
 	protected $plugin;
@@ -26,6 +27,17 @@ class lxt_jast_post {
 		if (! is_admin()) {
 			add_action( 'the_posts', array( $this, 'post_has_shortcode') );
 		}
+
+		$this->meta = ['class'	=> __('Popup window class', $this->slug), 
+					'visibility'	=> __('Survey visibility', $this->slug), 
+					'linktext'		=> __('Popup link text', $this->slug),
+					'linkclass'		=> __('Popup link class', $this->slug),
+					'closeclass'	=> __('Popup close button class', $this->slug),
+					'perpage'		=> __('Survey results per page', $this->slug)];
+	}
+
+	public function get_post_meta() {
+		return $this->meta;
 	}
 
 	public function add_plugin_posttype() {

@@ -13,7 +13,7 @@
  * Plugin class. This class used to do the shortcode parse work for public plugin work.
  */
 class lxt_jast_shortcode {
-	protected $shortcodes = ['lxt_dosurvey', 'lxt_surveyret', 'lxt_survey_qust', 'lxt_survey_submit', 'lxt_survey_email'];
+	protected $shortcodes = ['lxt_jast_survey', 'lxt_jast_result', 'lxt_jast_qust', 'lxt_jast_submit', 'lxt_jast_email'];
 
 	protected $ver;
 	protected $slug;
@@ -36,7 +36,7 @@ class lxt_jast_shortcode {
 		}
 	}
 
-	public function lxt_surveyret($attr) {
+	public function lxt_jast_result($attr) {
 		extract( shortcode_atts( array(
 			'title' => null,
 			'key' => null,
@@ -48,74 +48,80 @@ class lxt_jast_shortcode {
 		return $this->plugin->get_pub_obj()->get_survey_chart_frame($title, $key, $type, $width, $high);
 	}
 
-	public function lxt_survey_qust($attr) {
-		extract( shortcode_atts( array(
-			'key' => null,
-			'title' => null,
+	public function lxt_jast_qust($attr, $content) {
+		$attr = shortcode_atts( array(
+			'name' => null,
 			'type' => 'text',
-			'lcalss' => $this->slug . '_qust_title',
-			'iclass' => $this->slug.'_qust'
-		), $attr ) );
+			'class' => $this->slug.'_qust',
+			'option' => null,
+			'content' => $this->get_label_content( $content )
+		), $attr );
 
-		if ($key == null) 
-			return '';
+		if ($attr['name'] == null) 
+			return __('Error,a question must have a name', $this->slug);
 
-		if ($iclass != $iclass=$this->slug.'_qust') 
-			$iclass .= ' ' . $this->slug.'_qust';
-
-		if (($type == 'radio' || $type == 'checkbox') && !($answerstr = $attr['answer'])) 
+		if (($attr['type'] == 'radio' || $attr['type'] == 'checkbox') && !$attr['option']) 
 			return __('Error, no option answer.', $this->slug);
 
-		$output = '<label class="' . $lcalss . '" >' . $title . '</label>';
+		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_qust'); 
+
+	
+		if ($attr['type'] == 'textarea')
+			$temp = '<div class="{$class}">{$content}<textarea name="{$name}" /></div>';
+		else if ($attr['type'] == 'radio' || $attr['type'] == 'checkbox') {
+			$attr['options'] = explode(";", $attr['option']);
+			$temp = '<div class="{$class}">{$content}{foreach $options as $item}<lable><input type="{$type}" name="{$name}" />{$item}</label>{/foreach}</div>';
+		}
+		else
+			$temp = '<div class="{$class}">{$content}<input type="{$type}" name="{$name}" /></div>';
 		
-		if ($type == 'textarea') {
-			$output .= '<textarea rows="3" class="' . $iclass . '" name="' . $key . '" />';
-		}else if ($type != 'radio' && $type != 'checkbox') {
-			$output .= '<input class="' . $iclass . '" type="' . $type . '" name="' . $key . '" />';
-		}else{
-			$answers = explode(";", $answerstr);
-			foreach ($answers as $answer) {
-				$output .= '<label class="' . $iclass . '" ><input class="' . $iclass . '" ';
-				if ($answers[0] == $answer && $type == 'radio')
-					$output .= 'checked ';
-			   	$output .= 'type="' . $type . '" name="' . $key . '" value="' . $answer . '" />' . $answer . '</label>';
-			}
-		}
+		$output = lxt_public_lib::smarty_template_array($temp, $attr);
 
 		return $output;
 	}
 
-	public function lxt_survey_submit($attr) {
-		extract( shortcode_atts( array(
-			'title' => __('Submit' , $this->slug),
-			'class' => $this->slug . '_submit'
-		), $attr ) );
+	public function lxt_jast_email($attr, $content) {
+		$attr = shortcode_atts( array(
+			'class' => $this->slug . '_qust',
+			'name' => $this->slug . '_the_email',
+			'content' => $this->get_label_content( $content )
+		), $attr );
 
-		if ($class != $this->slug . '_submit') 
-			$class .= ' ' . $this->slug . '_submit';
+		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_qust'); 
 
-		$output = '<button type="button" class="' . $class . '">'. $title . '</button>';
+		$output = '';
 
-		return $output;
-	}
-
-	public function lxt_survey_email($attr) {
-		extract( shortcode_atts( array(
-			'title' => __('Please supply your email:' , $this->slug),
-			'tclass' => $this->slug . '_qust_title',
-			'iclass' => $iclass=$this->slug . '_qust'
-		), $attr ) );
-		$output = "";
 		if ( !is_user_logged_in() ) {
-			$output .= '<label class="' . $tclass . '" >' . $title . '</label>';
-			$output .= '<input class="' . $iclass . '" type="email" name="' . $this->slug . '_the_email"></input>';
+			$temp = '<div class="{$class}">{$content}<input type="email" name="{$name}" /></div>';
+			$output = lxt_public_lib::smarty_template_array($temp, $attr);
 		}
 
 		return $output;
 	}
 
+	private function get_label_content( $content ) {
+		if ( $content != strip_tags($content) )
+			return $content;
+		else
+			return '<header>' . $content . '</header>';
+	}
 
-	public function lxt_dosurvey($attr) {
+	public function lxt_jast_submit($attr) {
+		$attr = shortcode_atts( array(
+			'value' => __('Finish' , $this->slug),
+			'class' => $this->slug . '_submit',
+		), $attr );
+
+		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_submit'); 
+
+		$temp = '<button type="button" class="{$class}">{$value}</button>';
+		$output = lxt_public_lib::smarty_template_array($temp, $attr);
+
+		return $output;
+	}
+
+
+	public function lxt_jast_survey($attr) {
 		if (!$attr || !($title = $attr['title'])) return '';
 
 		return $this->plugin->get_pub_obj()->get_survey_container( $title, 'shortcode' );

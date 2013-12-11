@@ -25,7 +25,7 @@ class lxt_jast_wgsv extends WP_Widget {
 
 		parent::__construct (
 			$this->slug.'wgsv', // Base ID
-			__('Survey panel', $this->slug), // Name
+			__('Survey', $this->slug), // Name
 			array( 'description' => __( 'A widget can contain survey links.', $this->slug ), ) // Args
 		);
 
@@ -74,7 +74,7 @@ class lxt_jast_wgsv extends WP_Widget {
 
         extract($args);
 
-		$title = apply_filters( 'widget_title', __('Surveys panel', $this->slug) );
+		$title = apply_filters( 'widget_title', __('Survey', $this->slug) );
         $surveytitle = $instance['title'];
 		
 		$output = $this->plugin->get_pub_obj()->get_survey_container($surveytitle, 'widget' );

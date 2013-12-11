@@ -1,27 +1,16 @@
 @slug: ~'lxt_jast';
 
-.lxt_button { 
+.lxt_loading {
+	background:url(loader.gif) center center no-repeat;
+}
+
+.@{slug}_popup_close {
 	background-color:#2b91af;
-	border-radius:10px;
-	box-shadow:0 2px 3px rgba(0,0,0,0.3);
 	color:#fff;
 	cursor:pointer;
 	display:inline-block;
 	text-align:center;
 	text-decoration:none;
-	padding:5px 10px;
-}
-
-.lxt_loading {
-	background:url(loader.gif) center center no-repeat;
-}
-
-.@{slug}_popup_open {
-	/*.lxt_button;*/
-}
-
-.@{slug}_popup_close {
-	.lxt_button;
 	border-radius:7px;
 	box-shadow:none;
 	font:bold 131% sans-serif;
@@ -41,28 +30,6 @@
 	box-shadow:0 0 25px 5px #999;
 	color:#111;
 	display:none;
-	/*min-width:450px;*/
+	min-width:450px;
 	padding:25px;
-}
-
-.@{slug}_survey_title {
-	font-style: normal;
-	font-weight: bold;
-	font-size: 150%;
-}
-
-.@{slug}_qust_title {
-	font-style: italic;
-	font-weight: bold;
-	font-size: 120%;
-}
-
-.@{slug}_qust {
-}
-
-textarea.@{slug}_qust {
-	width:100%;
-}
-
-.@{slug}_submit {
 }

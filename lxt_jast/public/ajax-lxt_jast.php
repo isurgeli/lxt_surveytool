@@ -73,7 +73,7 @@ class lxt_jast_ajax {
 	public function ajax_load_survey() {
 		$postid = $_POST["id"];
 	
-		echo $this->plugin->get_pub_obj()->get_survey_content( $postid );
+		$this->plugin->get_pub_obj()->get_survey_content( $postid );
 		die();
 	}
 

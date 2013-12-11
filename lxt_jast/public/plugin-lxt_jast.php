@@ -17,6 +17,7 @@ class lxt_jast_plugin {
 	protected static $ver = '1.0.0';
 	protected static $slug = 'lxt_jast';
 	protected $shortcodes = null;
+	protected $survey_meta = null;
 	protected $pub_obj = null;
 
 	protected static $instance = null;
@@ -38,15 +39,17 @@ class lxt_jast_plugin {
 		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-'.self::$slug.'.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'wgsv-'.self::$slug.'.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'public-'.self::$slug.'.php' );
+		require_once( plugin_dir_path( __FILE__ ).'../lib/lxt_public_lib.php' );
 
 		new lxt_jast_ajax();
 		new lxt_jast_load();
-		new lxt_jast_post();
+		$post_obj = new lxt_jast_post();
 		$sc_obj = new lxt_jast_shortcode();
 		//new lxt_jast_wgsv();
 		$this->pub_obj = new lxt_jast_pub();
 
 		$this->shortcodes = $sc_obj->get_shortcodes();
+		$this->survey_meta = $post_obj->get_post_meta();
 
 		$this->register_widgets();
 	}
@@ -65,6 +68,10 @@ class lxt_jast_plugin {
 
 	public function get_shortcodes() {
 		return $this->shortcodes;
+	}
+
+	public function get_survey_meta() {
+		return $this->survey_meta;
 	}
 
 	public function get_pub_obj() {
