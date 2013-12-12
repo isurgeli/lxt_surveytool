@@ -37,15 +37,15 @@ class lxt_jast_shortcode {
 	}
 
 	public function lxt_jast_result($attr) {
-		extract( shortcode_atts( array(
+		$attr = shortcode_atts( array(
 			'title' => null,
-			'key' => null,
+			'name' => null,
 			'width' => '300px',
 			'high' => '300px',
 			'type' => null
-		), $attr ) );
+		), $attr );
 
-		return $this->plugin->get_pub_obj()->get_survey_chart_frame($title, $key, $type, $width, $high);
+		return $this->plugin->get_pub_obj()->get_survey_chart_frame($attr);
 	}
 
 	public function lxt_jast_qust($attr, $content) {

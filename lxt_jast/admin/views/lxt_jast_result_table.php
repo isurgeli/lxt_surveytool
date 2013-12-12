@@ -22,13 +22,13 @@ if(!class_exists('WP_List_Table')){
 
 class lxt_jast_result_table extends WP_List_Table {
 	protected $post_id;
-	protected $qust_key;
+	protected $qust_name;
 
 	protected $ver;
 	protected $slug;
 	protected $plugin;
     
-    function __construct($screen_id, $id, $key){
+    function __construct($screen_id, $id, $name){
         global $status, $page;
                 
         //Set parent defaults
@@ -40,7 +40,7 @@ class lxt_jast_result_table extends WP_List_Table {
         ) );
 
 		$this->post_id = $id;
-		$this->qust_key = $key;
+		$this->qust_name = $name;
 
 		$this->plugin = lxt_jast_plugin::get_instance(); 
 		$this->slug = $this->plugin->get_slug();
@@ -134,7 +134,7 @@ class lxt_jast_result_table extends WP_List_Table {
 		$data = $wpdb->get_results( $querystr, ARRAY_A);
 
 		for ($i = 0; $i < count($data); $i++) {
-			preg_match_all ('/"' . $this->qust_key . '":"([^"]+)"/', $data[$i]['result'], $pat_array);
+			preg_match_all ('/"' . $this->qust_name . '":"([^"]+)"/', $data[$i]['result'], $pat_array);
 
 			if (count($pat_array[0]) == 0) {
 				$data[$i]['content'] = '';

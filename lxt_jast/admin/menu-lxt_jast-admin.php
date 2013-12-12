@@ -42,7 +42,39 @@ class lxt_jast_menu_Admin {
 	}
 
 	public function display_survey_result_page() {
-		include_once( 'views/lxt_jast_admin_results.php' );
+		//	include_once( 'views/lxt_jast_admin_results.php' );
+?>
+<div class="wrap">
+<?php screen_icon(); ?>
+<input type="hidden" id="lxt_jast_screen_id" value="<?php $screen=get_current_screen(); echo $screen->id; ?>" />
+<header>
+<h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
+<div class="lxt_jast_select_survey"><span class="lxt_jast_select_action">
+<?php _e('Please select the survey you like to view: ', $this->slug); ?>
+<select id="<?php echo $this->slug ?>_survey_title" ><option value=""></option>
+<?php	$loop = $this->plugin->get_pub_obj()->get_post_loop(null);
+		if ( $loop->have_posts() ) {
+			while ( $loop->have_posts() ) {
+				$loop->the_post();
+?>
+<option value="<?php echo get_the_title() ?>"><?php echo get_the_title() ?></option>
+<?php
+			}
+		}
+		wp_reset_postdata();
+?>
+</select>
+</span></div>
+</header>
+<h3 class="nav-tab-wrapper">
+<a href="javascript:void(0)" id="lxt_jast_image_tab" class="nav-tab nav-tab-active"><?php _e( 'Chart', $this->slug ); ?></a>
+<a href="javascript:void(0)" id="lxt_jast_text_tab" class="nav-tab"><?php _e( 'Text', $this->slug ); ?></a>
+</h3>
+<div id="lxt_jast_result_content"/>
+</div>
+
+<?php
+		include( ABSPATH . 'wp-admin/admin-footer.php' );
 	}
 }
 

@@ -40,9 +40,16 @@ class lxt_jast_ajax {
 	}
 
 	public function ajax_get_chart_frame() {
-		$title = $_POST["title"];
+		$attr = [];
+		$attr = shortcode_atts( array(
+			'title' => $_POST["title"],
+			'name' => null,
+			'width' => '50%',
+			'high' => '300px',
+			'type' => null
+		), $attr );
 	
-		echo $this->plugin->get_pub_obj()->get_survey_chart_frame($title, null, null, '50%', '300px');
+		echo $this->plugin->get_pub_obj()->get_survey_chart_frame($attr);
 		die();
 	}
 
@@ -58,12 +65,12 @@ class lxt_jast_ajax {
 
 	public function ajax_get_text_table() {
 		$screen_id = $_POST["screen_id"];
-		$key = $_POST["key"];
+		$name = $_POST["name"];
 		$post_id = $_POST["post_id"];
 
 		require_once (plugin_dir_path(__FILE__) . '..\admin\views\lxt_jast_result_table.php');
 
-	    $testListTable = new lxt_jast_result_table( $screen_id, $post_id, $key);
+	    $testListTable = new lxt_jast_result_table( $screen_id, $post_id, $name);
 		$testListTable->prepare_items();
 		$testListTable->display();
 

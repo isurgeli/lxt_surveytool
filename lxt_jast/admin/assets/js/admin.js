@@ -56,15 +56,15 @@
 			$('#'+$.lxt_jast.slug+'_result_content').html(resp);
 			if ($('#'+$.lxt_jast.slug+'_survey_qust').length > 0) {
 				$('#'+$.lxt_jast.slug+'_survey_qust').change(function(){
-					var key = $(this).val();
-					if (key == "") {
+					var name = $(this).val();
+					if (name == "") {
 						$('.'+$.lxt_jast.slug+'_result_table').html('');
 					}else{
 						var table = $('.'+$.lxt_jast.slug+'_result_table');
 						var id = $(table).attr('id');
 
 						var secs = id.split('_');
-						id = secs[0]+'_'+secs[1]+'_'+secs[2]+'_'+secs[3]+'_'+key;
+						id = secs[0]+'_'+secs[1]+'_'+secs[2]+'_'+secs[3]+'_'+name;
 						$(table).attr('id', id);
 
 						$.lxt_jast.getSurveyTextTable(table, '1');
@@ -80,7 +80,7 @@
 
 		var ajaxObj = {action : $.lxt_jast.slug+'_text_table'};
 		ajaxObj.post_id = secs[3];
-		ajaxObj.key = secs[4];
+		ajaxObj.name = secs[4];
 		ajaxObj.paged = page;
 		ajaxObj.screen_id = $.lxt_jast.screen_id;
 

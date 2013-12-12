@@ -57,9 +57,9 @@ class lxt_jast_post_Admin {
 			<?php foreach($group as $item) {?>
 				<label style="display: table-cell"><?php echo esc_attr__( $survey_meta[$item], $this->slug); ?></label>
 				<?php if ($item != 'visibility') {?>
-					<input style="display: table-cell" type="text" name="<?php echo $this->slug ?>_md_field_<?php echo $item ?>" value="<?php echo esc_attr( $$item ); ?>"/>
+					<input style="display: table-cell;width: 95%" type="text" name="<?php echo $this->slug ?>_md_field_<?php echo $item ?>" value="<?php echo esc_attr( $$item ); ?>"/>
 				<?php } else { ?>
-					<select style="display: table-cell;width: 100%" name="<?php echo $this->slug ?>_md_field_visibility">
+					<select style="display: table-cell;width: 95%" name="<?php echo $this->slug ?>_md_field_visibility">
 						<option value="<?php echo esc_attr__( 'All', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'All', $this->slug) ); ?>>
 							<?php echo esc_attr__( 'All', $this->slug); ?>
 						</option>

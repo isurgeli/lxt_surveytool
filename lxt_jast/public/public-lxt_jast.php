@@ -107,23 +107,28 @@ class lxt_jast_pub {
 		return $loop;
 	}
 
-	public function get_survey_chart_frame($title, $key, $type, $width, $high) {		
+	public function get_survey_chart_frame($attr) {		
+		extract($attr);
+
 		if ($title == null) return '';
 
-		$post_data = $this->get_survey_questions( $title , $key );
+		$post_data = $this->get_survey_questions( $title , $name );
 
 		$post_id = $post_data['id'];
-		$questions = $post_data['qust'];
+
 		$output = '';
-		foreach ($questions as $question) {
-			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
+		for ($j = 0; $j < count($post_data['attr']); $j++) {
+			$attr = $post_data['attr'][$j];
+			$content = $post_data['content'][$j];
+
+			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $attr, $pat_array);
 			$qust_attr = [];
 			for ($i = 0; $i < count($pat_array[0]); $i++) {
 				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
 			}
 
 			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' )
-				|| !isset($qust_attr['answer']) ) {
+				|| !isset($qust_attr['option']) ) {
 				continue;
 			}
 
@@ -137,10 +142,10 @@ class lxt_jast_pub {
 			}
 
 
-			$cur_key = $qust_attr['key'];
+			$cur_name = $qust_attr['name'];
 		
-			$qust_title = $qust_attr['title'];
-			$output.= '<div type="' .$this->slug . '_' .$qust_type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_key . '_' 
+			$qust_title = strip_tags($content);
+			$output.= '<div type="' .$this->slug . '_' .$qust_type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_name . '_' 
 				. wp_create_nonce( get_the_id() ) . '" style="height:' . $high .';width:' . $width .'; " title="' . $qust_title . '" ></div>';
 		}
 		
@@ -153,30 +158,32 @@ class lxt_jast_pub {
 		$post_data = $this->get_survey_questions( $title , null );
 
 		$post_id = $post_data['id'];
-		$questions = $post_data['qust'];
-		$output = '<div class="lxt_jast_select_qust"><span class="lxt_jast_select_action">';
-		$output .= __('Please select the question: ', $this->slug); 
-		$output .= '<select id="' . $this->slug . '_survey_qust" >';
-		$output .= '<option value=""></option>';
-	
-		foreach ($questions as $question) {
-			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $question, $pat_array);
+?>
+	<div class="lxt_jast_select_qust"><span class="lxt_jast_select_action"><?php _e('Please select the question: ', $this->slug); ?>
+	<select id="<?php echo $this->slug; ?>_survey_qust"><option value=""></option>
+<?php
+		for ($j = 0; $j < count($post_data['attr']); $j++) {
+			$attr = $post_data['attr'][$j];
+			$content = $post_data['content'][$j];
+
+			preg_match_all ('/\s+([^"]+)="([^"]+)"/', $attr, $pat_array);
 			$qust_attr = [];
 			for ($i = 0; $i < count($pat_array[0]); $i++) {
 				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
 			}
 
 			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) {
-				$output .=  '<option value="'.$qust_attr['key'].'">'.$qust_attr['title'].'</option>';
+?>
+	<option value="<?php echo $qust_attr['name']; ?>"><?php echo strip_tags($content); ?></option>
+<?php
 			}
 		}
-		$output .= '</select>';
-		$output .= '</span></div>';
-		$output .= '<div class="lxt_jast_result_table" id="' . $this->slug . '_rettable_' . $post_id . '" />';
-		return $output;
+?>
+	</select></span></div><div class="<?php echo $this->slug; ?>_result_table" id="<?php echo $this->slug; ?>_rettable_<?php echo $post_id; ?>" />
+<?php
 	}
 
-	public function get_survey_questions( $title, $key ) {
+	public function get_survey_questions( $title, $name ) {
 		$loop = $this->plugin->get_pub_obj()->get_post_loop( $title );
 
 		if ( $loop->have_posts() ) {
@@ -185,13 +192,14 @@ class lxt_jast_pub {
 			$post_id = get_the_id();
 
 			$pat_array = null;
-			if ( !isset ( $key ) ) 
-				preg_match_all ('/\['.$this->plugin->get_shortcodes()[2].'[^\]]+\]/', $content, $pat_array);
+			$stag = $this->plugin->get_shortcodes()[2];
+			if ( !isset ( $name ) ) 
+				preg_match_all ('/\['.$stag.'([^\]]+)\](.*)\[\/'.$stag.'\]/', $content, $pat_array);
 			else
-				preg_match_all ('/\['.$this->plugin->get_shortcodes()[2].'[^\]]+key="'.$key.'"[^\]]+\]/', $content, $pat_array);
+				preg_match_all ('/\['.$stag.'([^\]]+name="'.$name.'"[^\]]+)\](.*)\[\/'.$stag.'\]/', $content, $pat_array);
 
 
-			$ret = ['id' => $post_id, 'qust' => $pat_array[0]];
+			$ret = ['id' => $post_id, 'attr' => $pat_array[1], 'content' => $pat_array[2]];
 		}else{
 			$ret = [];
 		}
@@ -206,7 +214,7 @@ class lxt_jast_pub {
 				'ver' => $this->ver,
 //				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
 				'ajaxurl' => admin_url().'admin-ajax.php',
-				'choiceLabel' => __("'s Choice"),
+				'choiceLabel' => __("Choice"),
 				'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
 			));
 			self::$is_local = true;
