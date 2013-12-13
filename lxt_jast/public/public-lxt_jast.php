@@ -57,7 +57,8 @@ class lxt_jast_pub {
 				'closeclass' => $this->slug . '_popup_close',
 				'nonce' =>  wp_create_nonce($context),
 				'slug' => $this->slug,
-				'post_id' => get_the_ID()
+				'post_id' => get_the_ID(),
+				'loader' => plugins_url( '../assets/ajax-loader.gif', __FILE__ )
 			), $attr );
 
 			if ( !is_user_logged_in() && $attr['visibility'] != __('All', $this->slug))
@@ -66,14 +67,14 @@ class lxt_jast_pub {
 			$this->add_class( $attr['linkclass'], $this->slug . '_popup_open'); 
 			$this->add_class( $attr['closeclass'], $this->slug . '_popup_close'); 
 
-			$temp = '<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span></div>'; 
-			//$temp .= '<div id="{$slug}_popup_container_{$nonce}"></div></div>';
+			$temp = '<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span>'; 
+			$temp .= '<div id="{$slug}_popup_container_{$nonce}"></div></div>';
 			$temp .= '<a href="javascript:void(0)" class="{$linkclass}" target="{$nonce}" postid="{$post_id}">{$linktext}</a>';
 
 			$output = lxt_public_lib::smarty_template_array($temp, $attr); 
 		}
 		else {
-			$output = '';
+			$output = __('Can not find survey', $this->slug) . ' [' . $title . ']' ;
 		}
 		wp_reset_postdata(); 
 		return $output;
@@ -81,8 +82,16 @@ class lxt_jast_pub {
 
 	public function get_survey_content( $postid ) {
 ?>
-		<header><?php get_post_field('post_title', $postid) ?></header>
+		<h1><?php echo get_post_field('post_title', $postid) ?></h1>
 <?php
+		$rmwpautop = get_post_meta($postid, $this->slug . '_md_wpautop', true);
+
+	    // Remove the filter
+		remove_filter('the_content', 'wpautop');
+	    if ('false' === $rmwpautop) {
+		} else {
+			add_filter('the_content', 'wpautop');
+	    }
 		echo apply_filters('the_content', get_post_field('post_content', $postid) );
 	}
 
@@ -110,9 +119,14 @@ class lxt_jast_pub {
 	public function get_survey_chart_frame($attr) {		
 		extract($attr);
 
-		if ($title == null) return '';
+		if ($title == null) 
+			return __('Must indicate the survey title', $this->slug);
 
 		$post_data = $this->get_survey_questions( $title , $name );
+
+		if ( ! array_key_exists('id', $post_data) )
+			return __('Can not find survey', $this->slug) . ' [' . $title . '-' . $name . ']';
+
 
 		$post_id = $post_data['id'];
 
@@ -142,17 +156,20 @@ class lxt_jast_pub {
 			}
 
 
+			//$cur_name = str_replace( '.', '-', $qust_attr['name'] );
+
 			$cur_name = $qust_attr['name'];
-		
 			$qust_title = strip_tags($content);
-			$output.= '<div type="' .$this->slug . '_' .$qust_type . '" class="'. $this->slug .'_result_img" id="' . $this->slug . '_retimg_' . $post_id . '_' . $cur_name . '_' 
-				. wp_create_nonce( get_the_id() ) . '" style="height:' . $high .';width:' . $width .'; " title="' . $qust_title . '" ></div>';
+			$nounce = wp_create_nonce( get_the_id() );
+			$output .= <<<OUT
+<div type="{$this->slug}_$qust_type" class="{$this->slug}_result_img" id="{$this->slug}_retimg_{$post_id}_{$cur_name}_$nounce" title="$qust_title" ></div>
+OUT;
 		}
 		
 		return $output;
 	}
 
-	public function get_survey_text_frame($title) {
+	public function get_survey_admin_result_frame($title, $type) {
 		if ($title == null) return '';
 
 		$post_data = $this->get_survey_questions( $title , null );
@@ -172,20 +189,34 @@ class lxt_jast_pub {
 				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
 			}
 
-			if ( ( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) {
+			if ( $type == 'text' &&	( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) {
 ?>
 	<option value="<?php echo $qust_attr['name']; ?>"><?php echo strip_tags($content); ?></option>
 <?php
+			} else if ( $type == 'img' &&	( strtolower( $qust_attr['type'] ) == 'radio' || strtolower( $qust_attr['type'] ) == 'checkbox' ) ) {
+				if ( strtolower( $qust_attr['type'] ) == 'checkbox' )
+					$img_type = $this->slug . '_bar';
+				else
+					$img_type = $this->slug . '_pie';
+?>
+	<option value='{"name":"<?php echo $qust_attr['name']; ?>","type":"<?php echo $img_type; ?>"}'><?php echo strip_tags($content); ?></option>
+<?php
 			}
 		}
+		if ( $type == 'text' ) {
 ?>
 	</select></span></div><div class="<?php echo $this->slug; ?>_result_table" id="<?php echo $this->slug; ?>_rettable_<?php echo $post_id; ?>" />
 <?php
+		} else if ( $type == 'img' ) {
+?>
+	</select></span></div><div class="<?php echo $this->slug; ?>_result_img" id="<?php echo $this->slug; ?>_retimg_<?php echo $post_id; ?>" title="" />
+<?php
+		}
 	}
 
 	public function get_survey_questions( $title, $name ) {
 		$loop = $this->plugin->get_pub_obj()->get_post_loop( $title );
-
+		$ret = [];
 		if ( $loop->have_posts() ) {
 			$loop->the_post();
 			$content = get_the_content();
@@ -199,9 +230,8 @@ class lxt_jast_pub {
 				preg_match_all ('/\['.$stag.'([^\]]+name="'.$name.'"[^\]]+)\](.*)\[\/'.$stag.'\]/', $content, $pat_array);
 
 
-			$ret = ['id' => $post_id, 'attr' => $pat_array[1], 'content' => $pat_array[2]];
-		}else{
-			$ret = [];
+			if (count($pat_array[0])>0)
+				$ret = ['id' => $post_id, 'attr' => $pat_array[1], 'content' => $pat_array[2]];
 		}
 		wp_reset_postdata();
 		return $ret;
@@ -212,9 +242,9 @@ class lxt_jast_pub {
 			wp_localize_script( $handle, 'lxt_jast_local_const', array(
 				'slug' => $this->slug,
 				'ver' => $this->ver,
-//				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
-				'ajaxurl' => admin_url().'admin-ajax.php',
-				'choiceLabel' => __("Choice"),
+				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
+//				'ajaxurl' => admin_url().'admin-ajax.php',
+				'choiceLabel' => __("Selected"),
 				'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
 			));
 			self::$is_local = true;

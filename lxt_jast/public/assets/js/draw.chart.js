@@ -6,6 +6,7 @@
 		var secs = id.split('_');
 		var imgtype = $(this).attr('type');
 		var title = $(this).attr('title');
+		var chart = this;
 
 		var ajaxObj = {action : $.lxt_jast.slug+'_getsurveyret'};
 		ajaxObj.key = secs[4];
@@ -16,7 +17,7 @@
 			try {
 				var retObj = JSON.parse(resp);
 			}catch(err){
-				$('#'+id).html(resp);
+				$(chart).html(resp);
 				return;
 			}
 
@@ -30,7 +31,7 @@
 						ticks.push(key);
 					}
 
-				$('#'+id).highcharts({
+				$(chart).highcharts({
 		            chart: {
 		                type: 'bar'
 		            },
@@ -54,7 +55,7 @@
 		                }
 		            },
 		            tooltip: {
-		                valueSuffix: '%'
+		                pointFormat: '<b>{point.y}%</b>: <span style="color:{series.color}">{series.name}</span><br/>'
 		            },
 		            plotOptions: {
 		                bar: {
@@ -87,7 +88,7 @@
 					if (key != $.lxt_jast.slug+'_total')
 						data.push(new Array(key, retObj[key]));
 
-				$('#'+id).highcharts({
+				$(chart).highcharts({
 			        chart: {
 			            plotBackgroundColor: null,
 			            plotBorderWidth: null,
@@ -97,7 +98,7 @@
 			            text: title
 			        },
 			        tooltip: {
-			    	    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+			    	    pointFormat: '<b>{point.percentage:.1f}%</b> {series.name}'
 			        },
 			        plotOptions: {
 			            pie: {
@@ -111,6 +112,9 @@
 			                }
 			            }
 			        },
+					credits: {
+		                enabled: false
+		            },
 			        series: [{
 			            type: 'pie',
 			            name: $.lxt_jast.choiceLabel,

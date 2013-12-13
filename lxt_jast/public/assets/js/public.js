@@ -22,22 +22,28 @@
 				loadUrl: $.lxt_jast.ajaxurl,
 				loadData: {action : $.lxt_jast.slug+'_loadsurvey', id : postid},
 				content: 'ajax',
-				contentContainer: '#'+$.lxt_jast.slug+'_popup_'+targetid,//'#'+$.lxt_jast.slug+'_popup_container_'+targetid,
+				contentContainer: '#'+$.lxt_jast.slug+'_popup_container_'+targetid,
+				onOpen: function() { $('#'+$.lxt_jast.slug+'_popup_container_'+targetid).addClass($.lxt_jast.slug+'_loading'); },
 				loadCallback: function() { 
+					$('#'+$.lxt_jast.slug+'_popup_container_'+targetid).removeClass($.lxt_jast.slug+'_loading');
 					$('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_submit').click(function() {
-						var allFields = $('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_qust[name]');
+						var allFields = $('#'+$.lxt_jast.slug+'_popup_'+targetid+' input[name],textarea[name]');
 						var ret = {};
 						allFields.each(function() {
+							if ($(this).hasClass($.lxt_jast.slug+'_other'))
+								return;
 							ret[$(this).attr('name')] = '';
 						});
 
 						allFields.each(function() {
-						if ( ( $(this).attr('type') == 'radio' || $(this).attr('type') == 'checkbox' ) && !$(this).prop('checked') )
-							return;
-						if (ret[$(this).attr('name')] !== '')
-							ret[$(this).attr('name')] = ret[$(this).attr('name')]+","+$(this).val();
-						else
-							ret[$(this).attr('name')] = $(this).val();
+							if ($(this).hasClass($.lxt_jast.slug+'_other'))
+								return;
+							if ( ( $(this).attr('type') == 'radio' || $(this).attr('type') == 'checkbox' ) && !$(this).prop('checked') )
+								return;
+							if (ret[$(this).attr('name')] !== '')
+								ret[$(this).attr('name')] = ret[$(this).attr('name')]+","+$(this).val();
+							else
+								ret[$(this).attr('name')] = $(this).val();
 						});
 				
 						var ajaxObj = {action : $.lxt_jast.slug+'_savesurvey'};
@@ -52,6 +58,14 @@
 						});
 				
 						$('#'+$.lxt_jast.slug+'_popup_'+targetid).bPopup().close();
+					});
+
+					$('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_other').change(function() {
+						$(this).parent().children(":first").val($(this).val());
+					});
+
+					$('#'+$.lxt_jast.slug+'_popup_'+targetid+' .'+$.lxt_jast.slug+'_other').focus(function() {
+						$(this).parent().children(":first").prop("checked", true);
 					});
 				}
 			});

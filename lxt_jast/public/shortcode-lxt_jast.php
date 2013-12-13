@@ -40,8 +40,6 @@ class lxt_jast_shortcode {
 		$attr = shortcode_atts( array(
 			'title' => null,
 			'name' => null,
-			'width' => '300px',
-			'high' => '300px',
 			'type' => null
 		), $attr );
 
@@ -54,7 +52,8 @@ class lxt_jast_shortcode {
 			'type' => 'text',
 			'class' => $this->slug.'_qust',
 			'option' => null,
-			'content' => $this->get_label_content( $content )
+			'content' => $this->get_label_content( $content ),
+			'otherclass' => $this->slug.'_other'
 		), $attr );
 
 		if ($attr['name'] == null) 
@@ -67,10 +66,18 @@ class lxt_jast_shortcode {
 
 	
 		if ($attr['type'] == 'textarea')
-			$temp = '<div class="{$class}">{$content}<textarea name="{$name}" /></div>';
+			$temp = '<div class="{$class}">{$content}<textarea name="{$name}"></textarea></div>';
 		else if ($attr['type'] == 'radio' || $attr['type'] == 'checkbox') {
 			$attr['options'] = explode(";", $attr['option']);
-			$temp = '<div class="{$class}">{$content}{foreach $options as $item}<lable><input type="{$type}" name="{$name}" />{$item}</label>{/foreach}</div>';
+			$temp = <<<'TEMP'
+<div class="{$class}">{$content}
+{foreach $options as $item}
+<span><input type="{$type}" name="{$name}" value="{$item}"/>
+{if $item}<label>{$item}</label>{else}<input type="text" class={$otherclass} name="{$name}~OTHER" />{/if}
+</span>
+{/foreach}
+</div>
+TEMP;
 		}
 		else
 			$temp = '<div class="{$class}">{$content}<input type="{$type}" name="{$name}" /></div>';
@@ -103,7 +110,7 @@ class lxt_jast_shortcode {
 		if ( $content != strip_tags($content) )
 			return $content;
 		else
-			return '<header>' . $content . '</header>';
+			return '<h2>' . $content . '</h2>';
 	}
 
 	public function lxt_jast_submit($attr) {
@@ -114,7 +121,7 @@ class lxt_jast_shortcode {
 
 		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_submit'); 
 
-		$temp = '<button type="button" class="{$class}">{$value}</button>';
+		$temp = '<div class="{$class}"><button type="button">{$value}</button></div>';
 		$output = lxt_public_lib::smarty_template_array($temp, $attr);
 
 		return $output;
@@ -122,7 +129,8 @@ class lxt_jast_shortcode {
 
 
 	public function lxt_jast_survey($attr) {
-		if (!$attr || !($title = $attr['title'])) return '';
+		if (!$attr || !($title = $attr['title'])) 
+			return __('Must indicate the survey title', $this->slug);
 
 		return $this->plugin->get_pub_obj()->get_survey_container( $title, 'shortcode' );
 	}

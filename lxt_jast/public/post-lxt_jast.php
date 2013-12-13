@@ -27,13 +27,14 @@ class lxt_jast_post {
 		if (! is_admin()) {
 			add_action( 'the_posts', array( $this, 'post_has_shortcode') );
 		}
-
+		add_filter('the_content', array( $this, 'rm_wpautop' ), 9);
 		$this->meta = ['class'	=> __('Popup window class', $this->slug), 
 					'visibility'	=> __('Survey visibility', $this->slug), 
 					'linktext'		=> __('Popup link text', $this->slug),
 					'linkclass'		=> __('Popup link class', $this->slug),
 					'closeclass'	=> __('Popup close button class', $this->slug),
-					'perpage'		=> __('Survey results per page', $this->slug)];
+					'perpage'		=> __('Survey results per page', $this->slug),
+					'wpautop'		=> __('Need auto p', $this->slug)];
 	}
 
 	public function get_post_meta() {
@@ -80,12 +81,27 @@ class lxt_jast_post {
 
 				if ( is_array($pat_array) && !empty($pat_array) && count($pat_array[0]) > 0 ) {
 					do_action($this->slug . '_post_has_shortcode', $shortcode);
-					break;
 				}
 			}
 		}
 
 		return $posts;
+	}
+
+	function rm_wpautop($content) {
+		global $post;
+		// Get the keys and values of the custom fields:
+		if (!isset($post->ID))
+			return $content;
+
+		$rmwpautop = get_post_meta($post->ID, $this->slug . '_md_wpautop', true);
+	    // Remove the filter
+		remove_filter('the_content', 'wpautop');
+	    if ('false' === $rmwpautop) {
+		} else {
+			add_filter('the_content', 'wpautop');
+	    }
+		return $content;
 	}
 }
 

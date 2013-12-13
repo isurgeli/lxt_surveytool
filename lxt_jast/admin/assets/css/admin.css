@@ -34,3 +34,7 @@ div.lxt_jast_select_qust {
 .wp-list-table .column-date {
   width: 10%;
 }
+div.lxt_jast_result_img {
+  width: 50%;
+  height: 300px;
+}

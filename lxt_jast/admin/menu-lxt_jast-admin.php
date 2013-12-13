@@ -74,7 +74,7 @@ class lxt_jast_menu_Admin {
 </div>
 
 <?php
-		include( ABSPATH . 'wp-admin/admin-footer.php' );
+		//include( ABSPATH . 'wp-admin/admin-footer.php' );
 	}
 }
 

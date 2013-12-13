@@ -39,9 +39,32 @@
 									
 		jQuery.post($.lxt_jast.ajaxurl, ajaxObj, function( resp ) {
 			$('#'+$.lxt_jast.slug+'_result_content').html(resp);
-			if ($('.'+$.lxt_jast.slug+'_result_img').length > 0) {
-				jQuery.getScript($.lxt_jast.pubjsdir+'draw.chart.js', function() {
-					$('.'+$.lxt_jast.slug+'_result_img').each($.lxt_jast.drawChart);
+			//if ($('.'+$.lxt_jast.slug+'_result_img').length > 0) {
+				//jQuery.getScript($.lxt_jast.pubjsdir+'draw.chart.js', function() {
+				//	$('.'+$.lxt_jast.slug+'_result_img').each($.lxt_jast.drawChart);
+				//});
+				
+			//}
+			if ($('#'+$.lxt_jast.slug+'_survey_qust').length > 0) {
+				$('#'+$.lxt_jast.slug+'_survey_qust').change(function(){
+					if ($(this).val() == "") {
+						$('.'+$.lxt_jast.slug+'_result_img').html('');
+					}else{
+						$(this).find("option:selected").text();
+						var sel = JSON.parse($(this).val());
+						var img = $('.'+$.lxt_jast.slug+'_result_img');
+						var id = $(img).attr('id');
+
+						var secs = id.split('_');
+						id = secs[0]+'_'+secs[1]+'_'+secs[2]+'_'+secs[3]+'_'+sel.name;
+						$(img).attr('id', id);
+						$(img).attr('type', sel.type);
+						$(img).attr('title', $(this).find("option:selected").text());
+
+						jQuery.getScript($.lxt_jast.pubjsdir+'draw.chart.js', function() {
+							$(img).each($.lxt_jast.drawChart);
+						});
+					}
 				});
 			}
 		});

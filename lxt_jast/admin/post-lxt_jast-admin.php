@@ -47,24 +47,34 @@ class lxt_jast_post_Admin {
 				'linktext' => '',
 				'linkclass' => '',
 				'closeclass' => '',
-				'perpage' => 5
+				'perpage' => 5,
+				'wpautop' => 'false'
 			), $attr ) );
 		?>
 		<p>
 		<div style="display: table;">
-		<?php foreach([['visibility', 'linktext', 'perpage'], ['class', 'linkclass', 'closeclass']] as $group) {?>
+		<?php foreach([['visibility', 'linktext', 'perpage', 'wpautop'], ['class', 'linkclass', 'closeclass']] as $group) {?>
 			<div style="display: table-row;">
 			<?php foreach($group as $item) {?>
 				<label style="display: table-cell"><?php echo esc_attr__( $survey_meta[$item], $this->slug); ?></label>
-				<?php if ($item != 'visibility') {?>
+				<?php if ($item != 'visibility' && $item != 'wpautop') {?>
 					<input style="display: table-cell;width: 95%" type="text" name="<?php echo $this->slug ?>_md_field_<?php echo $item ?>" value="<?php echo esc_attr( $$item ); ?>"/>
-				<?php } else { ?>
+				<?php } else if ($item == 'visibility') { ?>
 					<select style="display: table-cell;width: 95%" name="<?php echo $this->slug ?>_md_field_visibility">
-						<option value="<?php echo esc_attr__( 'All', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'All', $this->slug) ); ?>>
+						<option value="All" <?php selected( $visibility, 'All' ); ?>>
 							<?php echo esc_attr__( 'All', $this->slug); ?>
 						</option>
-						<option value="<?php echo esc_attr__( 'Login user', $this->slug); ?>" <?php selected( $visibility, esc_attr__( 'Login user', $this->slug) ); ?>>
+						<option value="Login user" <?php selected( $visibility, 'Login user' ); ?>>
 							<?php echo esc_attr__( 'Login user', $this->slug); ?>
+						</option>
+					</select>
+				<?php } else {?>
+					<select style="display: table-cell;width: 95%" name="<?php echo $this->slug ?>_md_field_wpautop">
+						<option value="true" <?php selected( $wpautop, 'true' ); ?>>
+							<?php echo esc_attr__( 'Yes', $this->slug); ?>
+						</option>
+						<option value="false" <?php selected( $wpautop, 'false' ); ?>>
+							<?php echo esc_attr__( 'No', $this->slug); ?>
 						</option>
 					</select>
 				<?php } ?>
@@ -72,7 +82,6 @@ class lxt_jast_post_Admin {
 			</div>
 		<?php } ?>
 		</div>
-		</p>
     <?php
  
 	}

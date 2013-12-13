@@ -40,16 +40,16 @@ class lxt_jast_ajax {
 	}
 
 	public function ajax_get_chart_frame() {
-		$attr = [];
-		$attr = shortcode_atts( array(
-			'title' => $_POST["title"],
-			'name' => null,
-			'width' => '50%',
-			'high' => '300px',
-			'type' => null
-		), $attr );
+		//$attr = [];
+		//$attr = shortcode_atts( array(
+		//	'title' => $_POST["title"],
+		//	'name' => null,
+		//	'type' => null
+		//), $attr );
 	
-		echo $this->plugin->get_pub_obj()->get_survey_chart_frame($attr);
+		//echo $this->plugin->get_pub_obj()->get_survey_chart_frame($attr);
+		$title = $_POST["title"];
+		echo $this->plugin->get_pub_obj()->get_survey_admin_result_frame($title, 'img');
 		die();
 	}
 
@@ -59,7 +59,7 @@ class lxt_jast_ajax {
 		if ( !array_key_exists ('page', $_REQUEST) )
 			$_REQUEST['page'] = 0;
 	
-		echo $this->plugin->get_pub_obj()->get_survey_text_frame($title);
+		echo $this->plugin->get_pub_obj()->get_survey_admin_result_frame($title, 'text');
 		die();
 	}
 
@@ -93,7 +93,11 @@ class lxt_jast_ajax {
 		$post_id = esc_sql ($_POST["postid"]);
 		$user = '';
 		if (!is_user_logged_in()) {
-			$email = esc_sql ($_POST["email"]);
+			if ( array_key_exists('email', $_POST) )
+				$email = esc_sql ($_POST["email"]);
+			else
+				$email = '';
+
 			$user = __('Visitor', $this->slug);
 		}else{
 			get_currentuserinfo();
@@ -113,10 +117,11 @@ class lxt_jast_ajax {
 		$key = esc_sql ($_POST["key"]);
 		$table_name = $wpdb->prefix . $this->slug. '_surveys';
 
-		$querystr = "SELECT " . $table_name . ".result FROM " . $table_name . " WHERE " . $table_name . ".postid = '" . $post_id . "'";
+		$querystr = "SELECT $table_name.result FROM $table_name WHERE $table_name.postid = '$post_id'";
 		$rets = $wpdb->get_col( $querystr );
 
 		$data = [];
+
 		foreach ( $rets as $ret ) {
 			preg_match_all ('/"' . $key . '":"([^"]+)"/', $ret, $pat_array);
 
