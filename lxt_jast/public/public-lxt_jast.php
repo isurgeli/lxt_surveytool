@@ -49,7 +49,7 @@ class lxt_jast_pub {
 			$loop->the_post();
 			$attr = $this->get_survey_meta_data( get_the_ID() );
 
-			$attr = shortcode_atts( array(
+			extract( shortcode_atts( array(
 				'visibility' => __('All', $this->slug),
 				'class' => $this->slug . '_popup',
 				'linktext' => get_the_title(),
@@ -59,19 +59,19 @@ class lxt_jast_pub {
 				'slug' => $this->slug,
 				'post_id' => get_the_ID(),
 				'loader' => plugins_url( '../assets/ajax-loader.gif', __FILE__ )
-			), $attr );
+			), $attr ) );
 
 			if ( !is_user_logged_in() && $attr['visibility'] != __('All', $this->slug))
 				return '';
 
-			$this->add_class( $attr['linkclass'], $this->slug . '_popup_open'); 
-			$this->add_class( $attr['closeclass'], $this->slug . '_popup_close'); 
+			$this->add_class( $linkclass, $this->slug . '_popup_open'); 
+			$this->add_class( $closeclass, $this->slug . '_popup_close'); 
 
-			$temp = '<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span>'; 
-			$temp .= '<div id="{$slug}_popup_container_{$nonce}"></div></div>';
-			$temp .= '<a href="javascript:void(0)" class="{$linkclass}" target="{$nonce}" postid="{$post_id}">{$linktext}</a>';
-
-			$output = lxt_public_lib::smarty_template_array($temp, $attr); 
+			$output = <<<OUT
+			<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span>
+			<div id="{$slug}_popup_container_{$nonce}"></div></div>
+			<a href="javascript:void(0)" class="{$linkclass}" target="{$nonce}" postid="{$post_id}">{$linktext}</a>
+OUT;
 		}
 		else {
 			$output = __('Can not find survey', $this->slug) . ' [' . $title . ']' ;
@@ -80,10 +80,8 @@ class lxt_jast_pub {
 		return $output;
 	}
 
-	public function get_survey_content( $postid ) {
-?>
-		<h1><?php echo get_post_field('post_title', $postid) ?></h1>
-<?php
+	public function get_survey_content( $postid ) { ?>
+		<h1><?php echo get_post_field('post_title', $postid) ?></h1> <?php
 		$rmwpautop = get_post_meta($postid, $this->slug . '_md_wpautop', true);
 
 	    // Remove the filter
@@ -105,6 +103,7 @@ class lxt_jast_pub {
 			'search_prod_title' => $title
 		);
 		if ( isset( $title) ) {
+			require_once( plugin_dir_path( __FILE__ ).'../lib/lxt_public_lib.php' );
 			add_filter( 'posts_where', array('lxt_public_lib', 'post_query_title_filter'), 10, 2 );
 		}
 		$loop = new WP_Query($args);
@@ -155,14 +154,11 @@ class lxt_jast_pub {
 					$qust_type = 'bar';
 			}
 
-
-			//$cur_name = str_replace( '.', '-', $qust_attr['name'] );
-
 			$cur_name = $qust_attr['name'];
 			$qust_title = strip_tags($content);
 			$nounce = wp_create_nonce( get_the_id() );
 			$output .= <<<OUT
-<div type="{$this->slug}_$qust_type" class="{$this->slug}_result_img" id="{$this->slug}_retimg_{$post_id}_{$cur_name}_$nounce" title="$qust_title" ></div>
+			<div type="{$this->slug}_$qust_type" class="{$this->slug}_result_img" id="{$this->slug}_retimg_{$post_id}_{$cur_name}_$nounce" title="$qust_title" ></div>
 OUT;
 		}
 		
@@ -174,11 +170,9 @@ OUT;
 
 		$post_data = $this->get_survey_questions( $title , null );
 
-		$post_id = $post_data['id'];
-?>
-	<div class="lxt_jast_select_qust"><span class="lxt_jast_select_action"><?php _e('Please select the question: ', $this->slug); ?>
-	<select id="<?php echo $this->slug; ?>_survey_qust"><option value=""></option>
-<?php
+		$post_id = $post_data['id']; ?>
+		<div class="lxt_jast_select_qust"><span class="lxt_jast_select_action"><?php _e('Please select the question: ', $this->slug); ?>
+		<select id="<?php echo $this->slug; ?>_survey_qust"><option value=""></option> <?php
 		for ($j = 0; $j < count($post_data['attr']); $j++) {
 			$attr = $post_data['attr'][$j];
 			$content = $post_data['content'][$j];
@@ -189,28 +183,20 @@ OUT;
 				$qust_attr[$pat_array[1][$i]] = $pat_array[2][$i];
 			}
 
-			if ( $type == 'text' &&	( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) {
-?>
-	<option value="<?php echo $qust_attr['name']; ?>"><?php echo strip_tags($content); ?></option>
-<?php
+			if ( $type == 'text' &&	( strtolower( $qust_attr['type'] ) != 'radio' && strtolower( $qust_attr['type'] ) != 'checkbox' ) ) { ?>
+				<option value="<?php echo $qust_attr['name']; ?>"><?php echo strip_tags($content); ?></option> <?php 
 			} else if ( $type == 'img' &&	( strtolower( $qust_attr['type'] ) == 'radio' || strtolower( $qust_attr['type'] ) == 'checkbox' ) ) {
 				if ( strtolower( $qust_attr['type'] ) == 'checkbox' )
 					$img_type = $this->slug . '_bar';
 				else
-					$img_type = $this->slug . '_pie';
-?>
-	<option value='{"name":"<?php echo $qust_attr['name']; ?>","type":"<?php echo $img_type; ?>"}'><?php echo strip_tags($content); ?></option>
-<?php
+					$img_type = $this->slug . '_pie'; ?>
+					<option value='{"name":"<?php echo $qust_attr['name']; ?>","type":"<?php echo $img_type; ?>"}'><?php echo strip_tags($content); ?></option> <?php
 			}
 		}
-		if ( $type == 'text' ) {
-?>
-	</select></span></div><div class="<?php echo $this->slug; ?>_result_table" id="<?php echo $this->slug; ?>_rettable_<?php echo $post_id; ?>" />
-<?php
-		} else if ( $type == 'img' ) {
-?>
-	</select></span></div><div class="<?php echo $this->slug; ?>_result_img" id="<?php echo $this->slug; ?>_retimg_<?php echo $post_id; ?>" title="" />
-<?php
+		if ( $type == 'text' ) { ?>
+			</select></span></div><div class="<?php echo $this->slug; ?>_result_table" id="<?php echo $this->slug; ?>_rettable_<?php echo $post_id; ?>" /> <?php
+		} else if ( $type == 'img' ) { ?>
+			</select></span></div><div class="<?php echo $this->slug; ?>_result_img" id="<?php echo $this->slug; ?>_retimg_<?php echo $post_id; ?>" title="" /> <?php
 		}
 	}
 
@@ -242,8 +228,8 @@ OUT;
 			wp_localize_script( $handle, 'lxt_jast_local_const', array(
 				'slug' => $this->slug,
 				'ver' => $this->ver,
-				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
-//				'ajaxurl' => admin_url().'admin-ajax.php',
+//				'ajaxurl' => admin_url().'admin-ajax.php' . '?XDEBUG_SESSION_START=1',
+				'ajaxurl' => admin_url().'admin-ajax.php',
 				'choiceLabel' => __("Selected"),
 				'pubjsurl' => plugins_url( 'assets/js/', __FILE__ )
 			));

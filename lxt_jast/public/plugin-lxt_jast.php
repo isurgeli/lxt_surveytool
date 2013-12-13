@@ -39,7 +39,6 @@ class lxt_jast_plugin {
 		require_once( plugin_dir_path( __FILE__ ) . 'shortcode-'.self::$slug.'.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'wgsv-'.self::$slug.'.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'public-'.self::$slug.'.php' );
-		require_once( plugin_dir_path( __FILE__ ).'../lib/lxt_public_lib.php' );
 
 		new lxt_jast_ajax();
 		new lxt_jast_load();

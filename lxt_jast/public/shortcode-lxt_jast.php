@@ -47,14 +47,14 @@ class lxt_jast_shortcode {
 	}
 
 	public function lxt_jast_qust($attr, $content) {
-		$attr = shortcode_atts( array(
+		extract( shortcode_atts( array(
 			'name' => null,
 			'type' => 'text',
 			'class' => $this->slug.'_qust',
 			'option' => null,
 			'content' => $this->get_label_content( $content ),
 			'otherclass' => $this->slug.'_other'
-		), $attr );
+		), $attr ) );
 
 		if ($attr['name'] == null) 
 			return __('Error,a question must have a name', $this->slug);
@@ -64,43 +64,46 @@ class lxt_jast_shortcode {
 
 		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_qust'); 
 
+		ob_start();
 	
-		if ($attr['type'] == 'textarea')
-			$temp = '<div class="{$class}">{$content}<textarea name="{$name}"></textarea></div>';
-		else if ($attr['type'] == 'radio' || $attr['type'] == 'checkbox') {
-			$attr['options'] = explode(";", $attr['option']);
-			$temp = <<<'TEMP'
-<div class="{$class}">{$content}
-{foreach $options as $item}
-<span><input type="{$type}" name="{$name}" value="{$item}"/>
-{if $item}<label>{$item}</label>{else}<input type="text" class={$otherclass} name="{$name}~OTHER" />{/if}
-</span>
-{/foreach}
-</div>
-TEMP;
+		if ($type == 'textarea') { ?>
+			<div class="<?php echo $class; ?>"><?php echo $content; ?><textarea name="<?php echo $name; ?>"></textarea></div> <?php
+		} else if ($type == 'radio' || $type == 'checkbox') { 
+			$options = explode(";", $option); ?>
+			<div class="<?php echo $class; ?>"> <?php	
+			echo $content; 
+			foreach ($options as $item) { ?>
+				<span><input type="<?php echo $type; ?>" name="<?php echo $name; ?>" value="<?php echo $item; ?>"/> <?php
+				if ($item) { ?>
+					<label><?php echo $item; ?></label> <?php
+				}else{ ?>
+					<input type="text" class=<?php echo $otherclass; ?> name="<?php echo $name; ?>~OTHER" /> <?php
+				} ?>
+				</span> <?php
+			} ?>
+			</div> <?php
+		} else { ?>
+			<div class="<?php echo $class; ?>"><?php echo $content; ?><input type="<?php echo $type; ?>" name="<?php echo $name; ?>" /></div> <?php
 		}
-		else
-			$temp = '<div class="{$class}">{$content}<input type="{$type}" name="{$name}" /></div>';
-		
-		$output = lxt_public_lib::smarty_template_array($temp, $attr);
 
+		$output = ob_get_contents();
+		ob_end_clean();
 		return $output;
 	}
 
 	public function lxt_jast_email($attr, $content) {
-		$attr = shortcode_atts( array(
+		extract( shortcode_atts( array(
 			'class' => $this->slug . '_qust',
 			'name' => $this->slug . '_the_email',
 			'content' => $this->get_label_content( $content )
-		), $attr );
+		), $attr ) );
 
-		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_qust'); 
+		$this->plugin->get_pub_obj()->add_class( $class, $this->slug . '_qust'); 
 
 		$output = '';
 
 		if ( !is_user_logged_in() ) {
-			$temp = '<div class="{$class}">{$content}<input type="email" name="{$name}" /></div>';
-			$output = lxt_public_lib::smarty_template_array($temp, $attr);
+			$output = "<div class=\"{$class}\">{$content}<input type=\"email\" name=\"{$name}\" /></div>";
 		}
 
 		return $output;
@@ -114,15 +117,14 @@ TEMP;
 	}
 
 	public function lxt_jast_submit($attr) {
-		$attr = shortcode_atts( array(
+		extract( shortcode_atts( array(
 			'value' => __('Finish' , $this->slug),
 			'class' => $this->slug . '_submit',
-		), $attr );
+		), $attr ) );
 
-		$this->plugin->get_pub_obj()->add_class( $attr['class'], $this->slug . '_submit'); 
+		$this->plugin->get_pub_obj()->add_class( $class, $this->slug . '_submit'); 
 
-		$temp = '<div class="{$class}"><button type="button">{$value}</button></div>';
-		$output = lxt_public_lib::smarty_template_array($temp, $attr);
+		$output = "<div class=\"{$class}\"><button type=\"button\">{$value}</button></div>";
 
 		return $output;
 	}
