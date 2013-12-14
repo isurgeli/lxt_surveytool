@@ -69,7 +69,7 @@ class lxt_jast_pub {
 
 			$output = <<<OUT
 			<div class="{$class}" id="{$slug}_popup_{$nonce}" ><span class="{$closeclass}"><span>X</span></span>
-			<div id="{$slug}_popup_container_{$nonce}"></div></div>
+			<div class="{$slug}_popup_decorator" ><div id="{$slug}_popup_container_{$nonce}"></div></div></div>
 			<a href="javascript:void(0)" class="{$linkclass}" target="{$nonce}" postid="{$post_id}">{$linktext}</a>
 OUT;
 		}

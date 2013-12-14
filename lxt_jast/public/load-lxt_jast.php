@@ -26,6 +26,7 @@ class lxt_jast_load {
 		if (! is_admin()) {
 			add_action( $this->slug . '_post_has_shortcode', array( $this, 'has_shortcode_enqueue') );	
 			add_action( $this->slug . '_has_widget', array( $this, 'has_widget_enqueue') );	
+			add_action( $this->slug . '_post_type', array( $this, 'post_type_enqueue') );	
 		}
 	}
 
@@ -38,8 +39,19 @@ class lxt_jast_load {
 	}
 
 	public function has_widget_enqueue( $widgetid ) {
-		if ( $widgetid == $this->slug.'wgsv' )
+		if ( $widgetid == $this->slug.'wgsv' ) {
 			$this->show_survey_enqueue();
+		}
+	}
+
+	public function post_type_enqueue( $postInfo ) {
+		extract( $postInfo );
+		if ( $post_type == $this->slug ) {
+			$this->show_survey_enqueue();
+			wp_localize_script( $this->slug . '-plugin-script', 'lxt_jast_post_const', array(
+				'post_id' => $post_id
+			));
+		}
 	}
 
 	public function show_survey_enqueue() {

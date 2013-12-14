@@ -28,7 +28,7 @@
   color: #111;
   display: none;
   min-width: 850px;
-  max-height: 700px;
+  max-height: 750px;
   min-height: 400px;
   padding: 25px;
 }
@@ -42,8 +42,13 @@
   font-weight: bold;
   padding: 0px;
   margin: 0px 0px 10px 0px;
-  width: 100%;
+  width: 95%;
   background-color: #5C5A4B;
+}
+.lxt_jast_popup > .lxt_jast_popup_decorator {
+  overflow: auto;
+  width: inherit;
+  height: inherit;
 }
 .lxt_jast_popup > div.lxt_jast_loading {
   background: url('../ajax-loader.gif') center center no-repeat;
@@ -54,17 +59,18 @@
   font: bold medium / 1.4 Helvetica, sans-serif;
   text-decoration: none;
   color: #333333;
+  width: 95%;
 }
 .lxt_jast_qust span {
   display: block;
 }
 .lxt_jast_qust textarea {
-  width: 90%;
+  width: 95%;
   row: 4;
 }
 .lxt_jast_qust_inline {
   display: table-row;
-  width: 100%;
+  width: 95%;
   height: 32px;
 }
 .lxt_jast_qust_inline h2 {

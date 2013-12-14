@@ -25,7 +25,7 @@ class lxt_jast_post {
 
 		add_action( 'init', array( $this, 'add_plugin_posttype' ) );
 		if (! is_admin()) {
-			add_action( 'the_posts', array( $this, 'post_has_shortcode') );
+			add_action( 'the_posts', array( $this, 'check_post') );
 		}
 		add_filter('the_content', array( $this, 'rm_wpautop' ), 9);
 		$this->meta = ['class'	=> __('Popup window class', $this->slug), 
@@ -70,7 +70,7 @@ class lxt_jast_post {
 		register_post_type( $this->slug, $survey_args );
 	}
 
-	function post_has_shortcode( $posts ) {
+	function check_post( $posts ) {
 		if ( empty($posts) )
 			return $posts;
 
@@ -82,6 +82,10 @@ class lxt_jast_post {
 				if ( is_array($pat_array) && !empty($pat_array) && count($pat_array[0]) > 0 ) {
 					do_action($this->slug . '_post_has_shortcode', $shortcode);
 				}
+			}
+
+			if (is_single() && get_post_type($post) == $this->slug){
+				do_action($this->slug . '_post_type', array('post_type' => $this->slug, 'post_id' => $post->ID));
 			}
 		}
 
